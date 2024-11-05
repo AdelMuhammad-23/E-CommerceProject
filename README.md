@@ -73,4 +73,5 @@ To get a local copy of this API up and running, follow these simple steps:
 
 1. Clone the repository:
    ```bash
-  https://github.com/AdelMuhammad-23/E-CommerceProject.git
+   git clone https://github.com/AdelMuhammad-23/E-CommerceProject.git
+
