@@ -1,0 +1,16 @@
+{
+  "Products": [
+    {
+      "Name": "Laptop",
+      "Description": "A powerful laptop",
+      "Price": 999.99,
+      "Stock": 50
+    },
+    {
+      "Name": "Smartphone",
+      "Description": "Latest model smartphone",
+      "Price": 499.99,
+      "Stock": 100
+    }
+  ]
+}

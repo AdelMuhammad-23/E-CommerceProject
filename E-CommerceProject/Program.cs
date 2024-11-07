@@ -1,4 +1,6 @@
+using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Infrastructure.Context;
+using E_CommerceProject.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,10 +19,22 @@ option.UseSqlServer(ConnectionString)
 );
 #endregion
 
+//Dependency Injection
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    context.Database.Migrate();
+
+    await ApplicationDbContext.SeedData(context);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
