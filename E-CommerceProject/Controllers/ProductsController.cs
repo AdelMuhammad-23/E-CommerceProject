@@ -45,6 +45,15 @@ namespace E_CommerceProject.Controllers
                 return NotFound($"Not Found Product with this ID:{id}");
             return Ok(product);
         }
+        [HttpDelete("Delete-Product-{id}")]
+        public async Task<IActionResult> DeleteProduct([FromRoute] int id)
+        {
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product == null)
+                return NotFound($"Not Found Product with this ID:{id}");
+            var deleteProduct = _productRepository.DeleteAsync(product);
+            return Ok("Delete Product Successfully");
+        }
         [HttpPost("AddProduct")]
         public async Task<IActionResult> AddProduct([FromForm] ProductsDTO productDTO)
         {
