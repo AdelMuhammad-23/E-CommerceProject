@@ -1,10 +1,10 @@
 ﻿using E_CommerceProject.Core.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace E_CommerceProject.Core.Interfaces
 {
-    public interface IProductRepository
+    public interface IProductRepository : IGenericRepository<Product>
     {
-        public Task<Product> GetProductByIdAsync(int id);
-        public Task<IReadOnlyList<Product>> GetProductsListAsync();
+        public Task<string> AddProductAsync(Product product, IFormFile productImage);
     }
 }

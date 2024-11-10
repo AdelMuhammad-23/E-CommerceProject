@@ -1,6 +1,10 @@
 using E_CommerceProject.Core.Interfaces;
+using E_CommerceProject.Core.Mapping.ProductMapping;
+using E_CommerceProject.Environment;
 using E_CommerceProject.Infrastructure.Context;
+using E_CommerceProject.Infrastructure.files;
 using E_CommerceProject.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,9 +23,21 @@ option.UseSqlServer(ConnectionString)
 );
 #endregion
 
-//Dependency Injection
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddHttpContextAccessor();
 
+//Dependency Injection
+builder.Services.AddTransient<IProductRepository, ProductRepository>();
+builder.Services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddAutoMapper(typeof(ProductProfile).Assembly);
+builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
+builder.Services.AddSingleton<IAppEnvironment, AppEnvironment>();
+
+builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+
+// Register IFileService and its implementation
+builder.Services.AddTransient<IFileService, FileService>();
+
+builder.Services.AddControllers();
 
 
 var app = builder.Build();
@@ -41,6 +57,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
