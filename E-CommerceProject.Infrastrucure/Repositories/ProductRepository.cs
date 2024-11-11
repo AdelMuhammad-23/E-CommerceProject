@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using E_CommerceProject.Core.DTOs;
 using E_CommerceProject.Core.Entities;
 using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Infrastructure.Context;
@@ -48,6 +49,57 @@ namespace E_CommerceProject.Infrastructure.Repositories
             await _products.AddAsync(product);
             await _dbContext.SaveChangesAsync();
             return "Success";
+        }
+
+        public async Task<List<ProductsListDTO>> GetProductListAsync()
+        {
+            var productDtos = await _products
+                                            .AsNoTracking()
+                                            .Select(p => new ProductsListDTO
+                                            {
+                                                Name = p.Name,
+                                                Description = p.Description,
+                                                Image = p.Image,
+                                                Price = p.Price,
+                                                Stock = p.Stock,
+                                                CreatedAt = p.CreatedAt,
+                                                CategoryName = p.ProductCategories.FirstOrDefault().Category.CategoryName
+                                            })
+                                            .ToListAsync();
+
+
+            return productDtos;
+        }
+
+        public async Task<string> UpdateProductAsync(Product product, IFormFile productImage)
+        {
+
+            if (productImage != null)
+            {
+                if (!string.IsNullOrEmpty(product.Image))
+                {
+                    var isDeleted = _fileServies.DeleteImage("Products", product.Image);
+                    if (!isDeleted)
+                        return "Failed to delete the old image.";
+                }
+                var context = _contextAccessor.HttpContext.Request;
+                var baseUrl = context.Scheme + "://" + context.Host;
+                var imageUrl = await _fileServies.UploadImage("Products", productImage);
+
+                switch (imageUrl)
+                {
+                    case "this extension is not allowed":
+                        return "this extension is not allowed";
+                    case "this image is too big":
+                        return "this image is too big";
+                    case "FailedToUploadImage":
+                        return "FailedToUploadImage";
+                }
+                product.Image = baseUrl + imageUrl;
+            }
+            _products.Update(product);
+            await _dbContext.SaveChangesAsync();
+            return "Updated product successfully";
         }
     }
 }

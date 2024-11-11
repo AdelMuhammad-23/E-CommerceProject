@@ -31,11 +31,10 @@ namespace E_CommerceProject.Controllers
         [HttpGet("ProductList")]
         public async Task<IActionResult> GetProductList()
         {
-            var products = await _productRepository.GetListAsync();
+            var products = await _productRepository.GetProductListAsync();
             if (products == null)
                 return NotFound("Not Found Product yet");
-            var productMapping = _mapper.Map<IReadOnlyList<ProductsListDTO>>(products);
-            return Ok(productMapping);
+            return Ok(products);
         }
         [HttpGet("Get-Product-By{id}")]
         public async Task<IActionResult> GetProductById([FromRoute] int id)
@@ -44,15 +43,6 @@ namespace E_CommerceProject.Controllers
             if (product == null)
                 return NotFound($"Not Found Product with this ID:{id}");
             return Ok(product);
-        }
-        [HttpDelete("Delete-Product-{id}")]
-        public async Task<IActionResult> DeleteProduct([FromRoute] int id)
-        {
-            var product = await _productRepository.GetByIdAsync(id);
-            if (product == null)
-                return NotFound($"Not Found Product with this ID:{id}");
-            var deleteProduct = _productRepository.DeleteAsync(product);
-            return Ok("Delete Product Successfully");
         }
         [HttpPost("AddProduct")]
         public async Task<IActionResult> AddProduct([FromForm] ProductsDTO productDTO)
@@ -69,6 +59,35 @@ namespace E_CommerceProject.Controllers
                     return BadRequest("FailedToUploadImage");
             }
             return Ok("Product added is done");
+        }
+        [HttpDelete("Delete-Product-{id}")]
+        public async Task<IActionResult> DeleteProduct([FromRoute] int id)
+        {
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product == null)
+                return NotFound($"Not Found Product with this ID: {id}");
+
+            await _productRepository.DeleteAsync(product);
+            return Ok("Delete Product Successfully");
+        }
+        [HttpPut("Update-Product")]
+        public async Task<IActionResult> UpdateProduct([FromForm] UpdateProductDTO productDTO)
+        {
+            var product = await _productRepository.GetByIdAsync(productDTO.Id);
+            if (product == null)
+                return NotFound($"Not Found Product with this ID: {productDTO.Id}");
+            var productMapping = _mapper.Map(productDTO, product);
+            var result = await _productRepository.UpdateProductAsync(productMapping, productDTO.Image);
+            switch (result)
+            {
+                case "this extension is not allowed":
+                    return BadRequest("this extension is not allowed");
+                case "this image is too big":
+                    return BadRequest("this image is too big");
+                case "FailedToUploadImage":
+                    return BadRequest("FailedToUploadImage");
+            }
+            return Ok("Update Product Successfully");
         }
     }
 }

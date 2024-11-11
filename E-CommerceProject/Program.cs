@@ -42,14 +42,14 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+//using (var scope = app.Services.CreateScope())
+//{
+//    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-    context.Database.Migrate();
+//    context.Database.Migrate();
 
-    await ApplicationDbContext.SeedData(context);
-}
+//    await ApplicationDbContext.SeedData(context);
+//}
 
 if (app.Environment.IsDevelopment())
 {

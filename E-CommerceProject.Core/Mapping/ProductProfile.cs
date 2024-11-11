@@ -6,8 +6,8 @@ namespace E_CommerceProject.Core.Mapping.ProductMapping
     {
         public ProductProfile()
         {
-            ProductListMapping();
             AddProductMapping();
+            UpdateProductMapping();
         }
     }
 }

@@ -54,6 +54,30 @@ namespace E_CommerceProject.Infrastructure.files
             #endregion
         }
 
+        public bool DeleteImage(string location, string imagePath)
+        {
+            if (string.IsNullOrEmpty(imagePath))
+                return false;
+
+            // التأكد من المسار الكامل
+            var fullPath = Path.Combine(_appEnvironment.WebRootPath, location, Path.GetFileName(imagePath));
+
+            if (File.Exists(fullPath))
+            {
+                try
+                {
+                    File.Delete(fullPath);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error deleting image: {ex.Message}");
+                    return false;
+                }
+            }
+
+            return false;
+        }
 
     }
 }

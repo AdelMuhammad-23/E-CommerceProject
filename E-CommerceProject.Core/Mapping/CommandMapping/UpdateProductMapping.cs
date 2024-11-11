@@ -5,9 +5,10 @@ namespace E_CommerceProject.Core.Mapping.ProductMapping
 {
     public partial class ProductProfile
     {
-        public void ProductListMapping()
+        public void UpdateProductMapping()
         {
-            CreateMap<Product, ProductsListDTO>();
+            CreateMap<UpdateProductDTO, Product>()
+                                             .ForMember(dest => dest.Image, src => src.Ignore());
         }
     }
 }
