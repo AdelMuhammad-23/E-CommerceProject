@@ -22,7 +22,7 @@ namespace E_CommerceProject.Controllers
         [HttpGet("CategoryList")]
         public async Task<IActionResult> GetCategoryList()
         {
-            var categories = await _categoryRepository.GetListAsync();
+            var categories = await _categoryRepository.GetCategoryList();
             if (categories == null)
                 return NotFound("No Categories yet");
             return Ok(categories);
@@ -30,7 +30,7 @@ namespace E_CommerceProject.Controllers
         [HttpGet("Get-Category-By{id}")]
         public async Task<IActionResult> GetCategoryById([FromRoute] int id)
         {
-            var category = await _categoryRepository.GetByIdAsync(id);
+            var category = await _categoryRepository.GetCategoryByIdAsync(id);
             if (category == null)
                 return NotFound($"No Category with this ID:{id}");
             return Ok(category);

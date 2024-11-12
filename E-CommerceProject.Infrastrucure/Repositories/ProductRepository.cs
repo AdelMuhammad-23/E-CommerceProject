@@ -40,6 +40,14 @@ namespace E_CommerceProject.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
             return "Success";
         }
+        public async Task<List<Product>> GetPagedProductsInCategory(int categoryId, int pageNumber, int pageSize)
+        {
+            return await _products
+                .Where(p => p.ProductCategories.Any(pc => pc.CategoryId == categoryId))
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
 
         public async Task<List<ProductsListDTO>> GetProductListAsync()
         {
@@ -61,6 +69,57 @@ namespace E_CommerceProject.Infrastructure.Repositories
             return productDtos;
         }
 
+
+
+
+        public async Task<PaginatedResult<ProductDto>> GetProductsAsync(
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? nameFilter = null,
+            decimal? priceFilter = null,
+            string? sortBy = null)
+        {
+            var query = _products.AsQueryable();
+
+            if (!string.IsNullOrEmpty(nameFilter))
+            {
+                query = query.Where(p => p.Name.Contains(nameFilter));
+            }
+
+            if (priceFilter.HasValue)
+            {
+                query = query.Where(p => p.Price <= priceFilter.Value);
+            }
+
+            query = sortBy switch
+            {
+                "name" => query.OrderBy(p => p.Name),
+                "price" => query.OrderBy(p => p.Price),
+                _ => query.OrderBy(p => p.ProductId)
+            };
+
+            var totalItems = await query.CountAsync();
+
+            var products = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new ProductDto
+                {
+                    Id = p.ProductId,
+                    Name = p.Name,
+                    Price = p.Price,
+                })
+                .ToListAsync();
+
+            return new PaginatedResult<ProductDto>
+            {
+                Items = products,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+            };
+        }
         public async Task<string> UpdateProductAsync(Product product, IFormFile productImage)
         {
 

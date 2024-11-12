@@ -24,6 +24,33 @@ namespace E_CommerceProject.Infrastructure.Repositories
             return "Category already exists";
         }
 
+        public async Task<object> GetCategoryByIdAsync(int id)
+        {
+            var categoryWithProducts = await _categories
+                .Where(c => c.CategoryId == id)
+                .Select(c => new
+                {
+                    CategoryName = c.CategoryName,
+                    Products = c.ProductCategories.Select(pc => pc.Product.Name).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            return categoryWithProducts;
+        }
+
+        public async Task<List<object>> GetCategoryList()
+        {
+            var categoriesWithProducts = await _categories
+                .Select(c => new
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName,
+                    ProductCategories = c.ProductCategories.Count() // عدد المنتجات في الفئة
+                })
+                .ToListAsync();
+
+            return categoriesWithProducts.Cast<object>().ToList();
+        }
 
     }
 }

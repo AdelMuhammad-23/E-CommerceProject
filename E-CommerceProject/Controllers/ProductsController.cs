@@ -24,6 +24,8 @@ namespace E_CommerceProject.Controllers
             _mapper = mapper;
             _fileServies = fileServies;
         }
+
+
         [HttpGet("ProductList")]
         public async Task<IActionResult> GetProductList()
         {
@@ -31,6 +33,14 @@ namespace E_CommerceProject.Controllers
             if (products == null)
                 return NotFound("Not Found Product yet");
             return Ok(products);
+        }
+        [HttpGet("Filter-Products")]
+        public async Task<IActionResult> GetProducts(int pageNumber = 1, int pageSize = 10, string? nameFilter = null, decimal? priceFilter = null, string? sortBy = null)
+        {
+            var result = await _productRepository.GetProductsAsync(
+                pageNumber, pageSize, nameFilter, priceFilter, sortBy);
+
+            return Ok(result);
         }
         [HttpGet("Get-Product-By{id}")]
         public async Task<IActionResult> GetProductById([FromRoute] int id)
@@ -85,5 +95,6 @@ namespace E_CommerceProject.Controllers
             }
             return Ok("Update Product Successfully");
         }
+
     }
 }
