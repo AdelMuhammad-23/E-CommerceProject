@@ -15,18 +15,14 @@ namespace E_CommerceProject.Controllers
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
         private readonly IFileService _fileServies;
-        private readonly IHttpContextAccessor _contextAccessor;
-
 
         public ProductsController(IProductRepository productRepository,
                                   IMapper mapper,
-                                  IFileService fileServies,
-                                  IHttpContextAccessor contextAccessor)
+                                  IFileService fileServies)
         {
             _productRepository = productRepository;
             _mapper = mapper;
             _fileServies = fileServies;
-            _contextAccessor = contextAccessor;
         }
         [HttpGet("ProductList")]
         public async Task<IActionResult> GetProductList()

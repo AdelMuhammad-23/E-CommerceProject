@@ -13,7 +13,7 @@ namespace E_CommerceProject.Infrastructure.files
             _appEnvironment = appEnvironment;
         }
 
-        public async Task<string> UploadImage(string location, IFormFile image)
+        public string UploadImage(string location, IFormFile image)
         {
             //Get Location
             var path = _appEnvironment.WebRootPath + "/" + location + "/";
@@ -42,8 +42,8 @@ namespace E_CommerceProject.Infrastructure.files
                 }
                 using (FileStream filestreem = File.Create(path + newFileName))
                 {
-                    await image.CopyToAsync(filestreem);
-                    await filestreem.FlushAsync();
+                    image.CopyTo(filestreem);
+                    filestreem.Flush();
                     return $"/{location}/{newFileName}";
                 }
             }

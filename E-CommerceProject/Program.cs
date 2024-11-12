@@ -27,9 +27,9 @@ builder.Services.AddHttpContextAccessor();
 
 //Dependency Injection
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
+builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddAutoMapper(typeof(ProductProfile).Assembly);
-builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
 builder.Services.AddSingleton<IAppEnvironment, AppEnvironment>();
 
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();

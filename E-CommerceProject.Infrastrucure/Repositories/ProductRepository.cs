@@ -32,20 +32,10 @@ namespace E_CommerceProject.Infrastructure.Repositories
 
         public async Task<string> AddProductAsync(Product product, IFormFile productImage)
         {
-            var context = _contextAccessor.HttpContext.Request;
-            var baseUrl = context.Scheme + "://" + context.Host;
-            var imageUrl = await _fileServies.UploadImage("Products", productImage);
+            //call function for handle Product image
+            var newImage = imageService(productImage);
+            product.Image = newImage;
 
-            switch (imageUrl)
-            {
-                case "this extension is not allowed":
-                    return "this extension is not allowed";
-                case "this image is too big":
-                    return "this image is too big";
-                case "FailedToUploadImage":
-                    return "FailedToUploadImage";
-            }
-            product.Image = baseUrl + imageUrl;
             await _products.AddAsync(product);
             await _dbContext.SaveChangesAsync();
             return "Success";
@@ -82,24 +72,35 @@ namespace E_CommerceProject.Infrastructure.Repositories
                     if (!isDeleted)
                         return "Failed to delete the old image.";
                 }
-                var context = _contextAccessor.HttpContext.Request;
-                var baseUrl = context.Scheme + "://" + context.Host;
-                var imageUrl = await _fileServies.UploadImage("Products", productImage);
 
-                switch (imageUrl)
-                {
-                    case "this extension is not allowed":
-                        return "this extension is not allowed";
-                    case "this image is too big":
-                        return "this image is too big";
-                    case "FailedToUploadImage":
-                        return "FailedToUploadImage";
-                }
-                product.Image = baseUrl + imageUrl;
+                var newImage = imageService(productImage);
+
+                product.Image = newImage;
             }
             _products.Update(product);
             await _dbContext.SaveChangesAsync();
             return "Updated product successfully";
         }
+
+        #region Handel Images
+        public string imageService(IFormFile productImage)
+        {
+            var context = _contextAccessor.HttpContext.Request;
+            var baseUrl = context.Scheme + "://" + context.Host;
+            var imageUrl = _fileServies.UploadImage("Products", productImage);
+
+            switch (imageUrl)
+            {
+                case "this extension is not allowed":
+                    return "this extension is not allowed";
+                case "this image is too big":
+                    return "this image is too big";
+                case "FailedToUploadImage":
+                    return "FailedToUploadImage";
+            }
+            var URL = baseUrl + imageUrl;
+            return URL;
+        }
+        #endregion
     }
 }
