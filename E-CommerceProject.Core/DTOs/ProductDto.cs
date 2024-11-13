@@ -1,11 +1,11 @@
 ﻿namespace E_CommerceProject.Core.DTOs
 {
-    public class ProductDto
+    public class ProductDto : BaseProductDto
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public decimal Price { get; set; }
+        public string? Image { get; set; }
         public int CategoryId { get; set; }
+
     }
 
 }

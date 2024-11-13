@@ -10,10 +10,7 @@ namespace E_CommerceProject.Core.Interfaces
            int pageNumber = 1,
            int pageSize = 10,
            string? nameFilter = null,
-           decimal? priceFilter = null,
-           string? sortBy = null);
-        public Task<List<Product>> GetPagedProductsInCategory(int categoryId, int pageNumber, int pageSize);
-
+           decimal? priceFilter = null);
         public Task<string> AddProductAsync(Product product, IFormFile productImage);
         public Task<List<ProductsListDTO>> GetProductListAsync();
         public Task<string> UpdateProductAsync(Product product, IFormFile productImage);

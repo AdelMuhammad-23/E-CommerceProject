@@ -35,11 +35,12 @@ namespace E_CommerceProject.Controllers
             return Ok(products);
         }
         [HttpGet("Filter-Products")]
-        public async Task<IActionResult> GetProducts(int pageNumber = 1, int pageSize = 10, string? nameFilter = null, decimal? priceFilter = null, string? sortBy = null)
+        public async Task<IActionResult> GetProducts(int pageNumber = 1,
+        int pageSize = 10,
+        string? nameFilter = null,
+        decimal? priceFilter = null)
         {
-            var result = await _productRepository.GetProductsAsync(
-                pageNumber, pageSize, nameFilter, priceFilter, sortBy);
-
+            var result = await _productRepository.GetProductsAsync(pageNumber, pageSize, nameFilter, priceFilter);
             return Ok(result);
         }
         [HttpGet("Get-Product-By{id}")]
@@ -51,7 +52,7 @@ namespace E_CommerceProject.Controllers
             return Ok(product);
         }
         [HttpPost("AddProduct")]
-        public async Task<IActionResult> AddProduct([FromForm] ProductsDTO productDTO)
+        public async Task<IActionResult> AddProduct([FromForm] AddProductsDTO productDTO)
         {
             var instructorMapping = _mapper.Map<Product>(productDTO);
             var result = await _productRepository.AddProductAsync(instructorMapping, productDTO.Image);

@@ -7,7 +7,7 @@ namespace E_CommerceProject.Core.Mapping.ProductMapping
     {
         public void AddProductMapping()
         {
-            CreateMap<ProductsDTO, Product>()
+            CreateMap<AddProductsDTO, Product>()
                 .ForMember(dest => dest.Image, src => src.Ignore());
 
         }
