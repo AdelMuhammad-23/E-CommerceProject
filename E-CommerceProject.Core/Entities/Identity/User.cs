@@ -1,8 +1,9 @@
-﻿namespace E_CommerceProject.Core.Entities.Identity
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace E_CommerceProject.Core.Entities.Identity
 {
-    public class User
+    public class User : IdentityUser<int>
     {
-        public int Id { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public virtual ICollection<Order>? Orders { get; set; } = new List<Order>();

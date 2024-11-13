@@ -6,6 +6,7 @@ using E_CommerceProject.Infrastructure.files;
 using E_CommerceProject.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using SchoolProject.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,9 +29,12 @@ builder.Services.AddHttpContextAccessor();
 //Dependency Injection
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IReviewRepository, ReviewRepository>();
 builder.Services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddAutoMapper(typeof(ProductProfile).Assembly);
 builder.Services.AddSingleton<IAppEnvironment, AppEnvironment>();
+builder.Services.AddServiceRegistration(builder.Configuration);
 
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 

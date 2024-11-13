@@ -1,11 +1,13 @@
 ﻿using E_CommerceProject.Core.Entities;
 using E_CommerceProject.Core.Entities.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 namespace E_CommerceProject.Infrastructure.Context
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<User, Role, int, IdentityUserClaim<int>, IdentityUserRole<int>, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -30,6 +32,12 @@ namespace E_CommerceProject.Infrastructure.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Ensure IdentityUserLogin has a primary key defined
+            modelBuilder.Entity<IdentityUserToken<int>>()
+                .HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
+
+            base.OnModelCreating(modelBuilder);
         }
 
 
