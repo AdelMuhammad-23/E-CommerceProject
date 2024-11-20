@@ -22,16 +22,19 @@ The **E-Commerce API** is a backend solution built using **ASP.NET Core**, desig
 8. **Role-Based Access**: Manages user permissions using roles.  
 9. **CORS Support**: Allows controlled cross-origin requests.
 
+### **File Management**
+10. **Image Upload**: Handles product image uploads with proper storage integration.
+    
 ### **Database Operations**
-10. **Entity Configuration**: Managed using **Fluent API** and conventions.  
-11. **Database Initialization**: Easy setup with automated migrations.  
+11. **Entity Configuration**: Managed using **Fluent API** and conventions.  
+12. **Database Initialization**: Easy setup with automated migrations.  
 
 ### **Utilities**
-12. **File Management**: Handles file uploads and storage efficiently.  
-13. **Logging**: Tracks application activity for debugging and monitoring.
+13. **File Management**: Handles file uploads and storage efficiently.  
+14. **Logging**: Tracks application activity for debugging and monitoring.
 
 ### **Testing**
-14. **Unit Tests**: Ensures API reliability using **XUnit**.
+15. **Unit Tests**: Ensures API reliability using **XUnit**.
 
 ---
 
