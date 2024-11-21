@@ -114,19 +114,3 @@ It is structured as a **3-Layered Architecture**, inspired by **Clean Architectu
 - Real-time notifications for order updates.  
 
 ---
-
-## **Database Schema (Simplified)**
-### **Categories**
-| Column Name | Data Type | Constraints       |
-|-------------|-----------|-------------------|
-| Id          | int       | Primary Key       |
-| Name        | string    | Required, Unique  |
-
-### **Products**
-| Column Name      | Data Type | Constraints       |
-|------------------|-----------|-------------------|
-| Id               | int       | Primary Key       |
-| Name             | string    | Required          |
-| Price            | decimal   | Required          |
-| CategoryId       | int       | Foreign Key       |
-| ImagePath        | string    | Nullable          |
