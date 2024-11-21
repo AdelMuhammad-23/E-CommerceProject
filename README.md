@@ -2,39 +2,36 @@
 # **E-Commerce API**
 
 ## **Overview**
-The **E-Commerce API** is a backend solution built using **ASP.NET Core**, designed to handle e-commerce operations like product management, category organization, and secure user authentication. The project architecture emphasizes separation of concerns and maintainability, drawing concepts from **Clean Architecture** and **Onion Architecture** principles. This ensures high scalability and code reusability.
+The **E-Commerce API** is a backend solution for managing e-commerce operations like product management, category organization, and secure user authentication.  
+It is structured as a **3-Layered Architecture**, inspired by **Clean Architecture** and **Onion Architecture**, ensuring high scalability, maintainability, and code reusability.
 
 ---
 
 ## **Features**
 ### **Core Architecture**
-1. **Layered Structure**: Organized into layers (API, Core, and Infrastructure) for maintainability and scalability.  
-2. **CQRS Pattern**: Separates command and query responsibilities for better performance and readability.  
-3. **Generic Repository Pattern**: Simplifies database interactions and enhances reusability.  
+1. **Layered Design**:  
+   - **API Layer**: Handles HTTP requests and responses (Presentation Layer).  
+   - **Core Layer**: Contains business logic, domain entities, and service interfaces.  
+   - **Infrastructure Layer**: Manages data access, repositories, and external services.  
+2. **CQRS Pattern**: Command-query separation for better readability and performance.  
+3. **Generic Repository**: Reusable design for database operations.  
 
-### **API Capabilities**
-4. **Pagination**: Enables efficient data retrieval for large datasets.  
-5. **Input Validation**: Ensures data integrity using **FluentValidation**.  
-6. **Swagger UI**: Built-in API documentation with support for JWT authentication.
+### **API Enhancements**
+4. **Pagination & Filtering**: Efficient data retrieval with optional filters for name and price.  
+5. **Validation**: Ensures input integrity with **FluentValidation**.  
+6. **API Documentation**: Integrated with **Swagger** (JWT support included).  
 
 ### **Security**
-7. **JWT Authentication**: Secures API endpoints with token-based authentication.  
-8. **Role-Based Access**: Manages user permissions using roles.  
-9. **CORS Support**: Allows controlled cross-origin requests.
+7. **JWT Authentication**: Secures API endpoints.  
+8. **Role-Based Access Control**: Restricts permissions based on roles.  
+9. **CORS Policy**: Controlled cross-origin access.  
 
 ### **File Management**
-10. **Image Upload**: Handles product image uploads with proper storage integration.
-    
-### **Database Operations**
-11. **Entity Configuration**: Managed using **Fluent API** and conventions.  
-12. **Database Initialization**: Easy setup with automated migrations.  
+10. **Image Handling**: Supports image upload and management for products.
 
 ### **Utilities**
-13. **File Management**: Handles file uploads and storage efficiently.  
-14. **Logging**: Tracks application activity for debugging and monitoring.
-
-### **Testing**
-15. **Unit Tests**: Ensures API reliability using **XUnit**.
+11. **Logging**: Tracks application activity using **Serilog** (or any configured logger).  
+12. **Unit Testing**: Reliable endpoint testing with **XUnit**.
 
 ---
 
@@ -45,6 +42,7 @@ The **E-Commerce API** is a backend solution built using **ASP.NET Core**, desig
 - **FluentValidation**  
 - **Swagger UI**  
 - **XUnit**  
+- **Serilog** (or your preferred logging tool)
 
 ---
 
@@ -54,7 +52,7 @@ The **E-Commerce API** is a backend solution built using **ASP.NET Core**, desig
    git clone https://github.com/AdelMuhammad-23/ECommerceAPI.git
    cd ECommerceAPI
    ```
-2. Configure the database connection in `appsettings.json`.
+2. Configure database connection in `appsettings.json`.
 3. Apply database migrations:  
    ```bash
    dotnet ef database update
@@ -69,9 +67,9 @@ The **E-Commerce API** is a backend solution built using **ASP.NET Core**, desig
 ## **Project Structure**
 ```plaintext
 - ECommerceAPI
-  - API (Presentation layer)
-  - Core (Business logic and domain layer)
-  - Infrastructure (Data access and external services)
+  - API (Presentation Layer: Controllers & Middleware)
+  - Core (Business Logic: Entities, DTOs, Interfaces)
+  - Infrastructure (Data Access: Repositories, Migrations)
 ```
 
 ---
@@ -79,33 +77,56 @@ The **E-Commerce API** is a backend solution built using **ASP.NET Core**, desig
 ## **Endpoints**
 ### **Categories**
 - **GET** `/api/Categories/CategoryList`  
-  Retrieves a paginated list of all categories.  
+  Retrieves paginated category list with optional filters.
 - **GET** `/api/Categories/Get-Category-By{id}`  
-  Retrieves details of a specific category by its ID.  
+  Fetches a specific category by ID.
 - **POST** `/api/Categories/Add-Category`  
-  Adds a new category to the system.  
+  Adds a new category.
 - **PUT** `/api/Categories/Update-Category`  
-  Updates an existing category.  
+  Updates an existing category.
 - **DELETE** `/api/Categories/Delete-Category-By{id}`  
   Deletes a category by ID.
 
 ### **Products**
 - **GET** `/api/Products/ProductList`  
-  Retrieves a paginated list of products, with optional filters for name and price.  
+  Retrieves paginated product list with filters (name, price).  
+  Example filter usage:  
+  ```json
+  {
+    "nameFilter": "phone",
+    "priceFilter": 500
+  }
+  ```
 - **GET** `/api/Products/Get-Product-By{id}`  
-  Retrieves details of a specific product by its ID.  
+  Retrieves product details by ID.
 - **POST** `/api/Products/AddProduct`  
-  Adds a new product to the system.  
+  Adds a new product with image upload.
 - **PUT** `/api/Products/Update-Product`  
-  Updates an existing product.  
+  Updates product details.
 - **DELETE** `/api/Products/Delete-Product-{id}`  
   Deletes a product by ID.
 
 ---
 
 ## **Future Enhancements**
-- Integration with a payment gateway for orders.  
-- Real-time order tracking and notifications.  
-- Analytics dashboard for admin users.  
+- Integration with a payment gateway for secure transactions.  
+- Adding user-friendly dashboards for admin analytics.  
+- Real-time notifications for order updates.  
 
 ---
+
+## **Database Schema (Simplified)**
+### **Categories**
+| Column Name | Data Type | Constraints       |
+|-------------|-----------|-------------------|
+| Id          | int       | Primary Key       |
+| Name        | string    | Required, Unique  |
+
+### **Products**
+| Column Name      | Data Type | Constraints       |
+|------------------|-----------|-------------------|
+| Id               | int       | Primary Key       |
+| Name             | string    | Required          |
+| Price            | decimal   | Required          |
+| CategoryId       | int       | Foreign Key       |
+| ImagePath        | string    | Nullable          |
