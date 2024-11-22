@@ -1,77 +1,116 @@
-# E-Commerce API
 
-## Overview
+# **E-Commerce API**
 
-This E-Commerce API provides a robust and scalable solution for managing an online shopping platform. It offers essential features such as user authentication, product management, order processing, and review systems, allowing developers to build a complete e-commerce experience.
+## **Overview**
+The **E-Commerce API** is a backend solution for managing e-commerce operations like product management, category organization, and secure user authentication.  
+It is structured as a **3-Layered Architecture**, inspired by **Clean Architecture** and **Onion Architecture**, ensuring high scalability, maintainability, and code reusability.
 
-## Features
+---
 
-- **User Management**: Create, read, update, and delete user accounts. Supports user authentication and session management.
-- **Product Management**: Add, update, delete, and retrieve products. Each product can have multiple categories, reviews, and associated images.
-- **Category Management**: Create and manage product categories for better organization and searchability.
-- **Shopping Cart**: Users can manage their shopping cart, add or remove items, and update quantities before checkout.
-- **Order Processing**: Users can place orders, view their order history, and check the status of current orders.
-- **Payment Integration**: Process payments securely and manage payment status for orders.
-- **Reviews and Ratings**: Allow users to leave reviews and ratings for products they have purchased, helping others make informed decisions.
-- **Wishlist**: Users can create and manage wishlists to save products for future purchases.
+## **Features**
+### **Core Architecture**
+1. **Layered Design**:  
+   - **API Layer**: Handles HTTP requests and responses (Presentation Layer).  
+   - **Core Layer**: Contains business logic, domain entities, and service interfaces.  
+   - **Infrastructure Layer**: Manages data access, repositories, and external services.  
+2. **CQRS Pattern**: Command-query separation for better readability and performance.  
+3. **Generic Repository**: Reusable design for database operations.  
 
-## API Endpoints
+### **API Enhancements**
+4. **Pagination & Filtering**: Efficient data retrieval with optional filters for name and price.  
+5. **Validation**: Ensures input integrity with **FluentValidation**.  
+6. **API Documentation**: Integrated with **Swagger** (JWT support included).  
 
-- **User Endpoints**
-  - `POST /api/users/register`: Register a new user.
-  - `POST /api/users/login`: Authenticate a user and retrieve a token.
-  - `GET /api/users/{id}`: Retrieve user details.
-  - `PUT /api/users/{id}`: Update user information.
-  - `DELETE /api/users/{id}`: Delete a user account.
+### **Security**
+7. **JWT Authentication**: Secures API endpoints.  
+8. **Role-Based Access Control**: Restricts permissions based on roles.  
+9. **CORS Policy**: Controlled cross-origin access.  
 
-- **Product Endpoints**
-  - `POST /api/products`: Add a new product.
-  - `GET /api/products`: Retrieve a list of all products.
-  - `GET /api/products/{id}`: Retrieve details of a specific product.
-  - `PUT /api/products/{id}`: Update product information.
-  - `DELETE /api/products/{id}`: Delete a product.
+### **File Management**
+10. **Image Handling**: Supports image upload and management for products.
 
-- **Category Endpoints**
-  - `POST /api/categories`: Create a new category.
-  - `GET /api/categories`: Retrieve a list of all categories.
-  - `GET /api/categories/{id}`: Retrieve details of a specific category.
-  - `PUT /api/categories/{id}`: Update category information.
-  - `DELETE /api/categories/{id}`: Delete a category.
+### **Utilities**
+11. **Logging**: Tracks application activity using **Serilog** (or any configured logger).  
+12. **Unit Testing**: Reliable endpoint testing with **XUnit**.
 
-- **Order Endpoints**
-  - `POST /api/orders`: Create a new order.
-  - `GET /api/orders`: Retrieve a list of all orders.
-  - `GET /api/orders/{id}`: Retrieve details of a specific order.
-  - `PUT /api/orders/{id}`: Update order status.
-  - `DELETE /api/orders/{id}`: Cancel an order.
+---
 
-- **Review Endpoints**
-  - `POST /api/reviews`: Add a review for a product.
-  - `GET /api/reviews/product/{productId}`: Retrieve all reviews for a specific product.
-  - `GET /api/reviews/{id}`: Retrieve a specific review.
-  - `PUT /api/reviews/{id}`: Update a review.
-  - `DELETE /api/reviews/{id}`: Delete a review.
+## **Technologies Used**
+- **ASP.NET Core Web API**  
+- **Entity Framework Core**  
+- **JWT Authentication**  
+- **FluentValidation**  
+- **Swagger UI**  
+- **XUnit**  
+- **Serilog** (or your preferred logging tool)
 
-- **Cart Endpoints**
-  - `POST /api/cart`: Create a shopping cart for a user.
-  - `GET /api/cart/{userId}`: Retrieve items in a user's shopping cart.
-  - `POST /api/cart/items`: Add an item to the cart.
-  - `PUT /api/cart/items/{itemId}`: Update item quantity in the cart.
-  - `DELETE /api/cart/items/{itemId}`: Remove an item from the cart.
+---
 
-## Technologies Used
-
-- ASP.NET Core Web API
-- Entity Framework Core
-- SQL Server
-- JWT for authentication
-- Swagger for API documentation
-
-## Getting Started
-
-To get a local copy of this API up and running, follow these simple steps:
-
-1. Clone the repository:
+## **Setup Instructions**
+1. Clone the repository:  
    ```bash
-   git clone https://github.com/AdelMuhammad-23/E-CommerceProject.git
+   git clone https://github.com/AdelMuhammad-23/ECommerceAPI.git
+   cd ECommerceAPI
+   ```
+2. Configure database connection in `appsettings.json`.
+3. Apply database migrations:  
+   ```bash
+   dotnet ef database update
+   ```
+4. Run the application:  
+   ```bash
+   dotnet run
+   ```
 
+---
+
+## **Project Structure**
+```plaintext
+- ECommerceAPI
+  - API (Presentation Layer: Controllers & Middleware)
+  - Core (Business Logic: Entities, DTOs, Interfaces)
+  - Infrastructure (Data Access: Repositories, Migrations)
+```
+
+---
+
+## **Endpoints**
+### **Categories**
+- **GET** `/api/Categories/CategoryList`  
+  Retrieves paginated category list with optional filters.
+- **GET** `/api/Categories/Get-Category-By{id}`  
+  Fetches a specific category by ID.
+- **POST** `/api/Categories/Add-Category`  
+  Adds a new category.
+- **PUT** `/api/Categories/Update-Category`  
+  Updates an existing category.
+- **DELETE** `/api/Categories/Delete-Category-By{id}`  
+  Deletes a category by ID.
+
+### **Products**
+- **GET** `/api/Products/ProductList`  
+  Retrieves paginated product list with filters (name, price).  
+  Example filter usage:  
+  ```json
+  {
+    "nameFilter": "phone",
+    "priceFilter": 500
+  }
+  ```
+- **GET** `/api/Products/Get-Product-By{id}`  
+  Retrieves product details by ID.
+- **POST** `/api/Products/AddProduct`  
+  Adds a new product with image upload.
+- **PUT** `/api/Products/Update-Product`  
+  Updates product details.
+- **DELETE** `/api/Products/Delete-Product-{id}`  
+  Deletes a product by ID.
+
+---
+
+## **Future Enhancements**
+- Integration with a payment gateway for secure transactions.  
+- Adding user-friendly dashboards for admin analytics.  
+- Real-time notifications for order updates.  
+
+---
