@@ -12,6 +12,7 @@ namespace SchoolProject.Infrastructure
     {
         public static IServiceCollection AddServiceRegistration(this IServiceCollection services, IConfiguration configuration)
         {
+            #region Registration Settings
             services.AddIdentity<User, Role>(option =>
             {
                 // Password settings.
@@ -32,6 +33,9 @@ namespace SchoolProject.Infrastructure
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 option.User.RequireUniqueEmail = false;
             }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+            #endregion
+
+
 
             return services;
         }
