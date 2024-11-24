@@ -2,6 +2,10 @@ using AutoMapper;
 using E_CommerceProject.Core.DTOs;
 using E_CommerceProject.Core.Entities;
 using E_CommerceProject.Core.Entities.Identity;
+using E_CommerceProject.Core.Interfaces;
+using E_CommerceProject.Infrastructure.Helper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -11,17 +15,24 @@ public class AccountController : ControllerBase
     #region Fields
     private readonly IMapper _mapper;
     private readonly IUserRepository _userRepository;
+    private readonly UserManager<User> _userManager;
+    private readonly SignInManager<User> _signInManager;
+    private readonly IAuthenticationRepository _authenticationRepository;
     #endregion
 
     #region constructor
-    public AccountController(IMapper mapper, IUserRepository userRepository)
+    public AccountController(IMapper mapper, IUserRepository userRepository, IAuthenticationRepository authenticationRepository, SignInManager<User> signInManager, UserManager<User> userManager)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        _authenticationRepository = authenticationRepository ?? throw new ArgumentNullException();
+        _signInManager = signInManager ?? throw new ArgumentNullException();
+        _userManager = userManager ?? throw new ArgumentNullException();
     }
     #endregion
 
     #region Endpoints
+    [AllowAnonymous]
     [HttpPost("SignUp")]
     public async Task<IActionResult> Register([FromBody] RegisterDTO register)
     {
@@ -57,9 +68,25 @@ public class AccountController : ControllerBase
          ? Ok(new { Message = "Address added successfully." })
          : BadRequest("Failed to add address.");
     }
+    [AllowAnonymous]
+    [HttpPost("SignIn")]
+    public async Task<JwtAuthResult> SignIn(SignInDTO signIn)
+    {
+        //Check if user is exist or not
+        var user = await _userManager.FindByNameAsync(signIn.UserName);
+        //Return The UserName Not Found
+        if (user == null) return BadRequest<JwtAuthResult>("User Name Is Not Exist");
+        //try To Sign in 
+        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, signIn.Password, false);
+        //if Failed Return Passord is wrong
+        if (!signInResult.Succeeded) return BadRequest<JwtAuthResult>("Password Is Not Correct");
 
 
-
+        //Generate Token
+        var result = await _authenticationRepository.GetJwtToken(user);
+        //return Token 
+        return Ok(result);
+    }
     #endregion
 
     #region Method Helper
