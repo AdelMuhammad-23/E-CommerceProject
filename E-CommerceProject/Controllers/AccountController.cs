@@ -1,8 +1,10 @@
 using AutoMapper;
+using E_CommerceProject.Base;
 using E_CommerceProject.Core.DTOs;
 using E_CommerceProject.Core.Entities;
 using E_CommerceProject.Core.Entities.Identity;
 using E_CommerceProject.Core.Interfaces;
+using E_CommerceProject.Core.Responses;
 using E_CommerceProject.Infrastructure.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -10,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AccountController : ControllerBase
+public class AccountController : AppControllerBase
 {
     #region Fields
     private readonly IMapper _mapper;
@@ -21,7 +23,11 @@ public class AccountController : ControllerBase
     #endregion
 
     #region constructor
-    public AccountController(IMapper mapper, IUserRepository userRepository, IAuthenticationRepository authenticationRepository, SignInManager<User> signInManager, UserManager<User> userManager)
+    public AccountController(IMapper mapper,
+                             IUserRepository userRepository,
+                             IAuthenticationRepository authenticationRepository,
+                             SignInManager<User> signInManager,
+                             UserManager<User> userManager)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -70,7 +76,7 @@ public class AccountController : ControllerBase
     }
     [AllowAnonymous]
     [HttpPost("SignIn")]
-    public async Task<JwtAuthResult> SignIn(SignInDTO signIn)
+    public async Task<Responses<JwtAuthResult>> SignIn(SignInDTO signIn)
     {
         //Check if user is exist or not
         var user = await _userManager.FindByNameAsync(signIn.UserName);
@@ -85,7 +91,7 @@ public class AccountController : ControllerBase
         //Generate Token
         var result = await _authenticationRepository.GetJwtToken(user);
         //return Token 
-        return Ok(result);
+        return Success(result);
     }
     #endregion
 
