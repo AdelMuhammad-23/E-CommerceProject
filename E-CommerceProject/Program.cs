@@ -28,6 +28,7 @@ builder.Services.AddHttpContextAccessor();
 
 //Dependency Injection
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
+builder.Services.AddTransient<IAuthenticationRepository, AuthenticationRepository>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IReviewRepository, ReviewRepository>();
@@ -65,6 +66,7 @@ if (app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -19,7 +19,6 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         _addresse = dbContext.Set<Address>();
     }
 
-
     #endregion
 
     #region Methods
@@ -55,6 +54,15 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     {
         return await _userManager.FindByIdAsync(id.ToString());
     }
+
+
+
+
+
+
+
+
+
     #endregion
     #region Method Helper
     private async Task<string> CheckUserExistenceAsync(User user)
