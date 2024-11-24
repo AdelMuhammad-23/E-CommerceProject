@@ -28,6 +28,7 @@ public class AccountController : AppControllerBase
                              IAuthenticationRepository authenticationRepository,
                              SignInManager<User> signInManager,
                              UserManager<User> userManager)
+
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -77,6 +78,7 @@ public class AccountController : AppControllerBase
     [AllowAnonymous]
     [HttpPost("SignIn")]
     public async Task<Responses<JwtAuthResult>> SignIn(SignInDTO signIn)
+
     {
         //Check if user is exist or not
         var user = await _userManager.FindByNameAsync(signIn.UserName);
@@ -92,6 +94,7 @@ public class AccountController : AppControllerBase
         var result = await _authenticationRepository.GetJwtToken(user);
         //return Token 
         return Success(result);
+
     }
     #endregion
 
