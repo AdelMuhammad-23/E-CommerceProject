@@ -74,25 +74,13 @@ public class AccountController : AppControllerBase
          ? Ok(new { Message = "Address added successfully." })
          : BadRequest("Failed to add address.");
     }
-    [AllowAnonymous]
-    [HttpPost("SignIn")]
-    public async Task<Responses<JwtAuthResult>> SignIn(SignInDTO signIn)
-    {
-        //Check if user is exist or not
-        var user = await _userManager.FindByNameAsync(signIn.UserName);
-        //Return The UserName Not Found
-        if (user == null) return BadRequest<JwtAuthResult>("User Name Is Not Exist");
-        //try To Sign in 
-        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, signIn.Password, false);
-        //if Failed Return Passord is wrong
-        if (!signInResult.Succeeded) return BadRequest<JwtAuthResult>("Password Is Not Correct");
 
 
         //Generate Token
         var result = await _authenticationRepository.GetJwtToken(user);
         //return Token 
         return Success(result);
-    }
+
     #endregion
 
     #region Method Helper
