@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
-using E_CommerceProject.Core.DTOs;
+using E_CommerceProject.Core.DTOs.ProductDTOs;
 using E_CommerceProject.Core.Entities;
 using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Infrastructure.files;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_CommerceProject.Controllers
@@ -10,6 +11,7 @@ namespace E_CommerceProject.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductsController : ControllerBase
     {
         private readonly IProductRepository _productRepository;

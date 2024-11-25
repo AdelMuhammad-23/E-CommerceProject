@@ -1,13 +1,15 @@
 ﻿using AutoMapper;
-using E_CommerceProject.Core.DTOs;
+using E_CommerceProject.Core.DTOs.CategoryDTOs;
 using E_CommerceProject.Core.Entities;
 using E_CommerceProject.Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_CommerceProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryRepository _categoryRepository;

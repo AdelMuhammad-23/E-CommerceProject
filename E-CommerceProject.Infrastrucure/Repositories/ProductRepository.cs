@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using E_CommerceProject.Core.DTOs;
+using E_CommerceProject.Core.DTOs.Pagination;
+using E_CommerceProject.Core.DTOs.ProductDTOs;
 using E_CommerceProject.Core.Entities;
 using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Infrastructure.Context;

@@ -26,6 +26,7 @@ namespace E_CommerceProject.Infrastructure.Context
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
+        public DbSet<UserRefreshToken> UserRefreshToken { get; set; }
 
 
 

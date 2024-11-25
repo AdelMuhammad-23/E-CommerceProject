@@ -1,4 +1,5 @@
-﻿using E_CommerceProject.Core.DTOs;
+﻿using E_CommerceProject.Core.DTOs.Pagination;
+using E_CommerceProject.Core.DTOs.ProductDTOs;
 using E_CommerceProject.Core.Entities;
 using Microsoft.AspNetCore.Http;
 

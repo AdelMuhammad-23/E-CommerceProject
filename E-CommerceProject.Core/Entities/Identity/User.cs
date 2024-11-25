@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace E_CommerceProject.Core.Entities.Identity
 {
@@ -12,6 +13,8 @@ namespace E_CommerceProject.Core.Entities.Identity
         public virtual ShoppingCart? ShoppingCart { get; set; }
         public virtual ICollection<Wishlist>? Wishlists { get; set; } = new List<Wishlist>();
         public ICollection<Payment>? Payments { get; set; }
+        [InverseProperty(nameof(UserRefreshToken.user))]
+        public virtual ICollection<UserRefreshToken> userRefreshToken { get; set; }
 
     }
 }

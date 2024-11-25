@@ -1,6 +1,6 @@
 using AutoMapper;
 using E_CommerceProject.Base;
-using E_CommerceProject.Core.DTOs;
+using E_CommerceProject.Core.DTOs.AccountDTOs;
 using E_CommerceProject.Core.Entities;
 using E_CommerceProject.Core.Entities.Identity;
 using E_CommerceProject.Core.Interfaces;
@@ -28,7 +28,6 @@ public class AccountController : AppControllerBase
                              IAuthenticationRepository authenticationRepository,
                              SignInManager<User> signInManager,
                              UserManager<User> userManager)
-
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -75,6 +74,7 @@ public class AccountController : AppControllerBase
          ? Ok(new { Message = "Address added successfully." })
          : BadRequest("Failed to add address.");
     }
+
     [AllowAnonymous]
     [HttpPost("SignIn")]
     public async Task<Responses<JwtAuthResult>> SignIn(SignInDTO signIn)
@@ -94,7 +94,6 @@ public class AccountController : AppControllerBase
         var result = await _authenticationRepository.GetJwtToken(user);
         //return Token 
         return Success(result);
-
     }
     #endregion
 

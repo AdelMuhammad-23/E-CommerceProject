@@ -1,4 +1,4 @@
-﻿using E_CommerceProject.Core.DTOs;
+﻿using E_CommerceProject.Core.DTOs.ProductDTOs;
 using E_CommerceProject.Core.Entities;
 
 namespace E_CommerceProject.Core.Mapping.ProductMapping
