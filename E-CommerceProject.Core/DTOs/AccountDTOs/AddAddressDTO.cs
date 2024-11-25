@@ -1,4 +1,4 @@
-﻿namespace E_CommerceProject.Core.DTOs
+﻿namespace E_CommerceProject.Core.DTOs.AccountDTOs
 {
     public class AddAddressDTO
     {

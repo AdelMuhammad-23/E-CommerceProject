@@ -1,4 +1,4 @@
-﻿namespace E_CommerceProject.Core.DTOs
+﻿namespace E_CommerceProject.Core.DTOs.Pagination
 {
     public class PaginatedResult<T>
     {

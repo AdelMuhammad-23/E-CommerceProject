@@ -1,4 +1,4 @@
-﻿using E_CommerceProject.Core.DTOs;
+﻿using E_CommerceProject.Core.DTOs.AccountDTOs;
 using E_CommerceProject.Core.Entities.Identity;
 
 namespace E_CommerceProject.Core.Mapping.UserMapping

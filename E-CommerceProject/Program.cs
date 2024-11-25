@@ -44,7 +44,19 @@ builder.Services.AddTransient<IFileService, FileService>();
 
 builder.Services.AddControllers();
 
-
+#region Allow CORS
+var CORS = "_cors";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: CORS,
+                      policy =>
+                      {
+                          policy.AllowAnyOrigin();
+                          policy.AllowAnyHeader();
+                          policy.AllowAnyMethod();
+                      });
+});
+#endregion
 
 var app = builder.Build();
 

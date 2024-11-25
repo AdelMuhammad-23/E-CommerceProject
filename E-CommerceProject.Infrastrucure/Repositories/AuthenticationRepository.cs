@@ -1,34 +1,57 @@
 ﻿using E_CommerceProject.Core.Entities.Identity;
+using E_CommerceProject.Core.Helper;
 using E_CommerceProject.Core.Interfaces;
+using E_CommerceProject.Infrastructure.Context;
 using E_CommerceProject.Infrastructure.Helper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections.Concurrent;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
-using E_CommerceProject.Core.Interfaces;
 
 namespace E_CommerceProject.Infrastructure.Repositories
 {
-    public class AuthenticationRepository : IAuthenticationRepository
+    public class AuthenticationRepository : GenericRepository<UserRefreshToken>, IAuthenticationRepository
     {
+        private readonly DbSet<UserRefreshToken> _userRefreshTokens;
         private readonly JwtSettings _jwtSettings;
+        private readonly ConcurrentDictionary<string, RefreshToken> _userRefreshToken;
+
         private readonly UserManager<User> _userManager;
 
-        public AuthenticationRepository(JwtSettings jwtSettings, UserManager<User> userManager)
+        public AuthenticationRepository(JwtSettings jwtSettings, UserManager<User> userManager, ApplicationDbContext dbContext) : base(dbContext)
         {
             _jwtSettings = jwtSettings;
             _userManager = userManager;
+            _userRefreshTokens = dbContext.Set<UserRefreshToken>();
+            _userRefreshToken = new ConcurrentDictionary<string, RefreshToken>();
         }
         public async Task<JwtAuthResult> GetJwtToken(User user)
         {
             var (jwtToken, accessToken) = await GetJWTToken(user);
+            var refreshToken = GetRefreshToken(user.UserName);
 
+            var refreshTokenResult = new UserRefreshToken
+            {
+                Token = accessToken,
+                RefreshToken = refreshToken.TokenString,
+                IsRevoked = false,
+                IsUsed = true,
+                AddedTime = DateTime.Now,
+                ExpiryDate = DateTime.Now.AddDays(_jwtSettings.RefreshTokenExpireDate),
+                UserId = user.Id,
+                JwtId = jwtToken.Id,
+            };
 
-
+            //add this data in UserRefreshTokenTable in database
+            await _userRefreshTokens.AddAsync(refreshTokenResult);
 
             var response = new JwtAuthResult();
             response.AccessToken = accessToken;
+            response.RefreshToken = refreshToken;
             return response;
         }
 
@@ -70,7 +93,49 @@ namespace E_CommerceProject.Infrastructure.Repositories
             return (jwtToken, accessToken);
         }
 
+
+        public async Task<JwtAuthResult> GetNewRefreshToken(User user, JwtSecurityToken jwtToken, DateTime? expiryDate, string refreshToken)
+        {
+
+            var (jwtSecurityToken, newToken) = await GetJWTToken(user);
+            #region Generate New Refresh Token
+            var response = new JwtAuthResult();
+            //new AccessToken
+            response.AccessToken = newToken;
+            //new Refresh Token
+            var refreshTokenResult = new RefreshToken();
+            refreshTokenResult.UserName = jwtToken.Claims.FirstOrDefault(x => x.Type == nameof(UserClaimModel.UserName)).Value;
+            refreshTokenResult.TokenString = refreshToken;
+            refreshTokenResult.ExpierAt = (DateTime)expiryDate;
+            response.RefreshToken = refreshTokenResult;
+
+            return response;
+            #endregion
+        }
+
         #endregion
 
+
+        #region Refresh Token Functions for Help
+        private RefreshToken GetRefreshToken(string userName)
+        {
+            var refreshToken = new RefreshToken
+            {
+                ExpierAt = DateTime.Now.AddMonths(_jwtSettings.RefreshTokenExpireDate),
+                TokenString = GeneratRefreshToken(),
+                UserName = userName
+            };
+            //if refreshtoken is exist => update if not Add
+            _userRefreshToken.AddOrUpdate(refreshToken.TokenString, refreshToken, (s, r) => refreshToken);
+            return refreshToken;
+        }
+        private string GeneratRefreshToken()
+        {
+            var rondamNumber = new byte[32];
+            var rondamNumberGenerated = RandomNumberGenerator.Create();
+            rondamNumberGenerated.GetBytes(rondamNumber);
+            return Convert.ToBase64String(rondamNumber);
+        }
+        #endregion
     }
 }
