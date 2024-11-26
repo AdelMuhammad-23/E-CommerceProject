@@ -32,6 +32,7 @@ public class AccountController : AppControllerBase
                              SignInManager<User> signInManager,
                              UserManager<User> userManager,
                              IAddressRepository addressRepository)
+
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userRepository = userRepository;
@@ -82,17 +83,14 @@ public class AccountController : AppControllerBase
     [HttpPut("UpdateAddress")]
     public async Task<IActionResult> UpdateAddress([FromForm] UpdateAddressDtO updateAddress)
     {
-        // «” Œ—«Ã UserId „‰ «· Êﬂ‰
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized("User is not authenticated.");
 
-        // «·⁄ÀÊ— ⁄·Ï «·⁄‰Ê«‰ «·„— »ÿ »«·„” Œœ„
         var address = await _addressRepository.GetByIdAsync(updateAddress.Id);
         if (address == null || address.UserId != int.Parse(userId))
             return NotFound("Address not found or you do not have permission to update it.");
 
-        //  ÕœÌÀ «·ÕﬁÊ· «·„—”·… ›ﬁÿ
         if (!string.IsNullOrWhiteSpace(updateAddress.AddressLine))
             address.AddressLine = updateAddress.AddressLine;
 
@@ -108,11 +106,11 @@ public class AccountController : AppControllerBase
         if (!string.IsNullOrWhiteSpace(updateAddress.Country))
             address.Country = updateAddress.Country;
 
-        //  ÕœÌÀ «·»Ì«‰«  ›Ì ﬁ«⁄œ… «·»Ì«‰« 
         await _addressRepository.UpdateAsync(address);
 
         return Ok(new { Message = "Address updated successfully." });
     }
+
 
 
     [AllowAnonymous]

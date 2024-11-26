@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using E_CommerceProject.Base;
 using E_CommerceProject.Core.DTOs.AuthenticationDTOs;
 using E_CommerceProject.Core.Entities.Identity;
@@ -6,6 +6,7 @@ using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Core.Responses;
 using E_CommerceProject.Infrastructure.Helper;
 using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_CommerceProject.Controllers
@@ -64,5 +65,5 @@ namespace E_CommerceProject.Controllers
             var result = await _authenticationRepository.GetNewRefreshToken(user, jwtToken, expiryDate, refreshToken.RefreshToken);
             return Success(result);
         }
-    }
+
 }
