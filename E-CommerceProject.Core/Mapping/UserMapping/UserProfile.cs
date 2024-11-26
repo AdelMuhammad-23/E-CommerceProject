@@ -8,6 +8,8 @@ namespace E_CommerceProject.Core.Mapping.UserMapping
         {
             AddUserCommandMapping();
             AddAddressUserMapping();
+            UpdateUserMapping();
+            UpdateAddressMapping();
         }
     }
 }

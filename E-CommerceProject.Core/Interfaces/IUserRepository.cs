@@ -6,5 +6,6 @@ public interface IUserRepository : IGenericRepository<User>
 {
     public Task<string> AddUserAsync(User user, string Password);
     public Task<string> AddAddressUserAsync(Address address);
+    public Task<bool> UpdateAddressUserAsync(Address address);
     public Task<User> GetUserByIdAsync(int id);
 }

@@ -8,6 +8,7 @@ namespace E_CommerceProject.Core.Interfaces
     {
         public Task<JwtAuthResult> GetJwtToken(User user);
         public Task<JwtAuthResult> GetNewRefreshToken(User user, JwtSecurityToken jwtToken, DateTime? expiryDate, string refreshToken);
-
+        public JwtSecurityToken ReadJwtToken(string accessToken);
+        public Task<(string, DateTime?)> ValidateDetails(JwtSecurityToken jwtToken, string accessToken, string refreshToken);
     }
 }
