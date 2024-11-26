@@ -17,17 +17,20 @@ namespace E_CommerceProject.Infrastructure.Repositories
     public class AuthenticationRepository : GenericRepository<UserRefreshToken>, IAuthenticationRepository
     {
         private readonly DbSet<UserRefreshToken> _userRefreshTokens;
+        private readonly IUserRefreshTokenRepository _userRefreshTokenRepository;
         private readonly JwtSettings _jwtSettings;
         private readonly ConcurrentDictionary<string, RefreshToken> _userRefreshToken;
 
         private readonly UserManager<User> _userManager;
 
-        public AuthenticationRepository(JwtSettings jwtSettings, UserManager<User> userManager, ApplicationDbContext dbContext) : base(dbContext)
+        public AuthenticationRepository(JwtSettings jwtSettings, UserManager<User> userManager, IUserRefreshTokenRepository userRefreshTokenRepository, ApplicationDbContext dbContext) : base(dbContext)
+
         {
             _jwtSettings = jwtSettings;
             _userManager = userManager;
             _userRefreshTokens = dbContext.Set<UserRefreshToken>();
             _userRefreshToken = new ConcurrentDictionary<string, RefreshToken>();
+            _userRefreshTokenRepository = userRefreshTokenRepository;
         }
         public async Task<JwtAuthResult> GetJwtToken(User user)
         {
@@ -62,7 +65,7 @@ namespace E_CommerceProject.Infrastructure.Repositories
             var roles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.NameIdentifier, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.MobilePhone, user.PhoneNumber),
             };
@@ -136,6 +139,58 @@ namespace E_CommerceProject.Infrastructure.Repositories
             rondamNumberGenerated.GetBytes(rondamNumber);
             return Convert.ToBase64String(rondamNumber);
         }
+        #endregion
+
+
+        public JwtSecurityToken ReadJwtToken(string accessToken)
+        {
+            if (String.IsNullOrEmpty(accessToken))
+                throw new ArgumentNullException(nameof(accessToken));
+
+            var handler = new JwtSecurityTokenHandler();
+
+            var response = handler.ReadJwtToken(accessToken);
+            return response;
+
+        }
+
+        public async Task<(string, DateTime?)> ValidateDetails(JwtSecurityToken jwtToken, string accessToken, string refreshToken)
+        {
+            if (jwtToken == null || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature))
+            {
+                return ("Algorithms is not correct", null);
+            }
+            // validate Token
+            if (jwtToken.ValidTo > DateTime.UtcNow)
+            {
+                return ("Token is not expired", null);
+            }
+
+            //Get User Id
+            var userId = jwtToken.Claims.FirstOrDefault(x => x.Type == nameof(UserClaimModel.Id)).Value;
+            //Get User
+            var userRefreshToken = await _userRefreshTokenRepository.GetTableNoTracking()
+                                             .FirstOrDefaultAsync(x => x.Token == accessToken &&
+                                                                     x.RefreshToken == refreshToken &&
+                                                                     x.UserId == int.Parse(userId));
+
+            if (userRefreshToken == null)
+            {
+                return ("Refresh Token is Not Found", null);
+            }
+
+            // validate Refresh Token
+            if (userRefreshToken.ExpiryDate < DateTime.UtcNow)
+            {
+                userRefreshToken.IsRevoked = true;
+                userRefreshToken.IsUsed = false;
+                await _userRefreshTokenRepository.UpdateAsync(userRefreshToken);
+                return ("Refresh Token is expired", null);
+            }
+            var expirydate = userRefreshToken.ExpiryDate;
+            return (userId, expirydate);
+        }
+
         #endregion
     }
 }

@@ -9,6 +9,7 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 {
     #region Fields
     private readonly DbSet<Address> _addresse;
+    private readonly DbSet<User> _user;
     private readonly UserManager<User> _userManager;
     #endregion
 
@@ -17,6 +18,7 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     {
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _addresse = dbContext.Set<Address>();
+        _user = dbContext.Set<User>();
     }
 
     #endregion
@@ -55,14 +57,6 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         return await _userManager.FindByIdAsync(id.ToString());
     }
 
-
-
-
-
-
-
-
-
     #endregion
     #region Method Helper
     private async Task<string> CheckUserExistenceAsync(User user)
@@ -75,6 +69,20 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 
         return null;
     }
+    public async Task<bool> UpdateAddressUserAsync(Address address)
+    {
+        try
+        {
+            _dbContext.Addresses.Update(address);
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     #endregion
 
 }

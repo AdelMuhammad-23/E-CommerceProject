@@ -9,6 +9,8 @@ using E_CommerceProject.Infrastructure.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -17,6 +19,7 @@ public class AccountController : AppControllerBase
     #region Fields
     private readonly IMapper _mapper;
     private readonly IUserRepository _userRepository;
+    private readonly IAddressRepository _addressRepository;
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly IAuthenticationRepository _authenticationRepository;
@@ -27,13 +30,16 @@ public class AccountController : AppControllerBase
                              IUserRepository userRepository,
                              IAuthenticationRepository authenticationRepository,
                              SignInManager<User> signInManager,
-                             UserManager<User> userManager)
+                             UserManager<User> userManager,
+                             IAddressRepository addressRepository)
+
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        _userRepository = userRepository;
         _authenticationRepository = authenticationRepository ?? throw new ArgumentNullException();
         _signInManager = signInManager ?? throw new ArgumentNullException();
         _userManager = userManager ?? throw new ArgumentNullException();
+        _addressRepository = addressRepository ?? throw new ArgumentNullException();
     }
     #endregion
 
@@ -74,10 +80,42 @@ public class AccountController : AppControllerBase
          ? Ok(new { Message = "Address added successfully." })
          : BadRequest("Failed to add address.");
     }
+    [HttpPut("UpdateAddress")]
+    public async Task<IActionResult> UpdateAddress([FromForm] UpdateAddressDtO updateAddress)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("User is not authenticated.");
+
+        var address = await _addressRepository.GetByIdAsync(updateAddress.Id);
+        if (address == null || address.UserId != int.Parse(userId))
+            return NotFound("Address not found or you do not have permission to update it.");
+
+        if (!string.IsNullOrWhiteSpace(updateAddress.AddressLine))
+            address.AddressLine = updateAddress.AddressLine;
+
+        if (!string.IsNullOrWhiteSpace(updateAddress.City))
+            address.City = updateAddress.City;
+
+        if (!string.IsNullOrWhiteSpace(updateAddress.State))
+            address.State = updateAddress.State;
+
+        if (!string.IsNullOrWhiteSpace(updateAddress.PostalCode))
+            address.PostalCode = updateAddress.PostalCode;
+
+        if (!string.IsNullOrWhiteSpace(updateAddress.Country))
+            address.Country = updateAddress.Country;
+
+        await _addressRepository.UpdateAsync(address);
+
+        return Ok(new { Message = "Address updated successfully." });
+    }
+
+
 
     [AllowAnonymous]
     [HttpPost("SignIn")]
-    public async Task<Responses<JwtAuthResult>> SignIn(SignInDTO signIn)
+    public async Task<Responses<JwtAuthResult>> SignIn([FromForm] SignInDTO signIn)
 
     {
         //Check if user is exist or not
@@ -95,6 +133,41 @@ public class AccountController : AppControllerBase
         //return Token 
         return Success(result);
     }
+    [HttpPut("UpdateProfile")]
+    public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileDTO updateUser)
+    {
+        var user = await _userManager.FindByIdAsync(updateUser.Id.ToString());
+        if (user == null)
+            return NotFound(new { Message = "User not found" });
+
+        if (!string.IsNullOrWhiteSpace(updateUser.UserName))
+        {
+            var userNameExists = await _userManager.Users
+                .AnyAsync(x => x.UserName == updateUser.UserName && x.Id != user.Id);
+
+            if (userNameExists)
+                return BadRequest(new { Message = "Username already exists" });
+
+            user.UserName = updateUser.UserName;
+        }
+
+        user.Email = string.IsNullOrWhiteSpace(updateUser.Email) ? user.Email : updateUser.Email;
+        user.PhoneNumber = string.IsNullOrWhiteSpace(updateUser.PhoneNumber) ? user.PhoneNumber : updateUser.PhoneNumber;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errorDescription = updateResult.Errors.FirstOrDefault()?.Description ?? "An unknown error occurred";
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { Message = $"An error occurred while updating the profile: {errorDescription}" });
+        }
+
+        return Ok(new { Message = "Profile updated successfully." });
+    }
+
+
+
+
     #endregion
 
     #region Method Helper

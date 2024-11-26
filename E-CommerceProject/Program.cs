@@ -29,7 +29,9 @@ builder.Services.AddHttpContextAccessor();
 //Dependency Injection
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<IAuthenticationRepository, AuthenticationRepository>();
+builder.Services.AddTransient<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+builder.Services.AddTransient<IAddressRepository, AddressRepository>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IReviewRepository, ReviewRepository>();
 builder.Services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
