@@ -112,17 +112,14 @@ public class AccountController : AppControllerBase
     [HttpPut("UpdateAddress")]
     public async Task<IActionResult> UpdateAddress([FromForm] UpdateAddressDtO updateAddress)
     {
-        // ÇÓÊÎÑÇÌ UserId ãä ÇáÊæßä
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized("User is not authenticated.");
 
-        // ÇáÚËæÑ Úáì ÇáÚäæÇä ÇáãÑÊÈØ ÈÇáãÓÊÎÏã
         var address = await _addressRepository.GetByIdAsync(updateAddress.Id);
         if (address == null || address.UserId != int.Parse(userId))
             return NotFound("Address not found or you do not have permission to update it.");
 
-        // ÊÍÏíË ÇáÍŞæá ÇáãÑÓáÉ İŞØ
         if (!string.IsNullOrWhiteSpace(updateAddress.AddressLine))
             address.AddressLine = updateAddress.AddressLine;
 
@@ -138,7 +135,6 @@ public class AccountController : AppControllerBase
         if (!string.IsNullOrWhiteSpace(updateAddress.Country))
             address.Country = updateAddress.Country;
 
-        // ÊÍÏíË ÇáÈíÇäÇÊ İí ŞÇÚÏÉ ÇáÈíÇäÇÊ
         await _addressRepository.UpdateAsync(address);
 
         return Ok(new { Message = "Address updated successfully." });
