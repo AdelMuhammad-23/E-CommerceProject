@@ -50,6 +50,20 @@ namespace E_CommerceProject.Infrastructure.Repositories
 
             //add this data in UserRefreshTokenTable in database
             await _userRefreshTokens.AddAsync(refreshTokenResult);
+            var refreshTokenResult = new UserRefreshToken
+            {
+                Token = accessToken,
+                RefreshToken = refreshToken.TokenString,
+                IsRevoked = false,
+                IsUsed = true,
+                AddedTime = DateTime.Now,
+                ExpiryDate = DateTime.Now.AddDays(_jwtSettings.RefreshTokenExpireDate),
+                UserId = user.Id,
+                JwtId = jwtToken.Id,
+            };
+
+            //add this data in UserRefreshTokenTable in database
+            await _userRefreshTokens.AddAsync(refreshTokenResult);
 
             var response = new JwtAuthResult();
             response.AccessToken = accessToken;
