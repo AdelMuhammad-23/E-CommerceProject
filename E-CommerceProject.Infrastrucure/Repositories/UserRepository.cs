@@ -69,6 +69,16 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 
         return null;
     }
+    public async Task<bool> ConfirmEmailAsync(string userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return false;
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        return result.Succeeded;
+    }
+
     public async Task<bool> UpdateAddressUserAsync(Address address)
     {
         try

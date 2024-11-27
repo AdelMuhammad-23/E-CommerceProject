@@ -6,6 +6,7 @@ using E_CommerceProject.Core.Entities.Identity;
 using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Core.Responses;
 using E_CommerceProject.Infrastructure.Helper;
+using E_CommerceProject.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,8 +18,11 @@ using System.Security.Claims;
 public class AccountController : AppControllerBase
 {
     #region Fields
+    private readonly IHttpContextAccessor _contextAccessor;
+    private readonly IUrlHelper _urlHelper;
     private readonly IMapper _mapper;
     private readonly IUserRepository _userRepository;
+    private readonly EmailService _emailService;
     private readonly IAddressRepository _addressRepository;
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
@@ -26,19 +30,24 @@ public class AccountController : AppControllerBase
     #endregion
 
     #region constructor
-    public AccountController(IMapper mapper,
+    public AccountController(IHttpContextAccessor contextAccessor,
+                             IUrlHelper urlHelper, IMapper mapper,
                              IUserRepository userRepository,
                              IAuthenticationRepository authenticationRepository,
+                             EmailService emailService,
                              SignInManager<User> signInManager,
                              UserManager<User> userManager,
                              IAddressRepository addressRepository)
     {
+        _contextAccessor = contextAccessor;
+        _urlHelper = urlHelper;
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userRepository = userRepository;
         _authenticationRepository = authenticationRepository ?? throw new ArgumentNullException();
         _signInManager = signInManager ?? throw new ArgumentNullException();
         _userManager = userManager ?? throw new ArgumentNullException();
         _addressRepository = addressRepository ?? throw new ArgumentNullException();
+        _emailService = emailService ?? throw new ArgumentNullException();
     }
     #endregion
 
@@ -47,23 +56,44 @@ public class AccountController : AppControllerBase
     [HttpPost("SignUp")]
     public async Task<IActionResult> Register([FromBody] RegisterDTO register)
     {
-        if (register == null) return BadRequest("Invalid register data.");
-        if (string.IsNullOrWhiteSpace(register.Password)) return BadRequest("Password cannot be empty.");
-
-        var user = _mapper.Map<User>(register);
-
-        // Call AddUserAsync
-        var result = await _userRepository.AddUserAsync(user, register.Password);
-
-        // If result is not a known case, pass it as error description
-        return result switch
+        if (register == null || string.IsNullOrWhiteSpace(register.Password))
         {
-            "EmailIsExist" or "UserNameIsExist" or "Success" or "PasswordCannotBeEmpty"
-                => HandleRegisterResponse(result),
-            _ => HandleRegisterResponse(result, result) // Pass the actual error description for unknown cases
-        };
-    }
+            return BadRequest("Invalid registration data or password cannot be empty.");
+        }
 
+        try
+        {
+            // Map the RegisterDTO to the User entity
+            var user = _mapper.Map<User>(register);
+
+            // Add user to the database (repository method)
+            var result = await _userRepository.AddUserAsync(user, register.Password);
+
+            if (result != "Success")
+                return BadRequest(result);
+
+            // Generate the email confirmation token
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            // Create the confirmation URL
+            var request = _contextAccessor.HttpContext.Request;
+            var returnUrl = $"{request.Scheme}://{request.Host}{_urlHelper.Action("ConfirmEmail", "Authentication", new { userId = user.Id, token = Uri.EscapeDataString(code) })}";
+
+            // Construct the email message
+            var message = $"To confirm your email, click the following link: <a href='{returnUrl}'>Confirm Email</a>";
+
+            // Send the confirmation email
+            await _emailService.SendEmailAsync(user.Email, "Email Confirmation", message);
+
+            return Ok("User registered successfully! Please check your email to confirm.");
+        }
+        catch (Exception ex)
+        {
+            // Log the error and return an internal server error response
+            //_logger.LogError($"Error during registration: {ex.Message}");
+            return StatusCode(500, "Internal server error. Please try again later.");
+        }
+    }
     [HttpPost("AddAddress")]
     public async Task<IActionResult> AddAddress(AddAddressDTO addressDto)
     {

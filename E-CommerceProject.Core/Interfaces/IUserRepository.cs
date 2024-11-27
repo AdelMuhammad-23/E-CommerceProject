@@ -8,4 +8,6 @@ public interface IUserRepository : IGenericRepository<User>
     public Task<string> AddAddressUserAsync(Address address);
     public Task<bool> UpdateAddressUserAsync(Address address);
     public Task<User> GetUserByIdAsync(int id);
+    public Task<bool> ConfirmEmailAsync(string userId, string token);
+
 }
