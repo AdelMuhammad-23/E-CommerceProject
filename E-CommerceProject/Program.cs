@@ -4,7 +4,10 @@ using E_CommerceProject.Environment;
 using E_CommerceProject.Infrastructure.Context;
 using E_CommerceProject.Infrastructure.files;
 using E_CommerceProject.Infrastructure.Repositories;
+using E_CommerceProject.Infrastructure.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using SchoolProject.Infrastructure;
 
@@ -26,23 +29,48 @@ option.UseSqlServer(ConnectionString)
 
 builder.Services.AddHttpContextAccessor();
 
-//Dependency Injection
+#region Dependency Injection
+//For Business Model
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
+builder.Services.AddTransient<IReviewRepository, ReviewRepository>();
+builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+
+//For Authentication
 builder.Services.AddTransient<IAuthenticationRepository, AuthenticationRepository>();
 builder.Services.AddTransient<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
-builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+
+//For Account
 builder.Services.AddTransient<IAddressRepository, AddressRepository>();
-builder.Services.AddTransient<IUserRepository, UserRepository>();
-builder.Services.AddTransient<IReviewRepository, ReviewRepository>();
+
+//For GenericRepo
 builder.Services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+//for AutoMapper
 builder.Services.AddAutoMapper(typeof(ProductProfile).Assembly);
+
+//
 builder.Services.AddSingleton<IAppEnvironment, AppEnvironment>();
+
+// for ServiceRegistration(Password Settings)
 builder.Services.AddServiceRegistration(builder.Configuration);
 
+//For Request info
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+builder.Services.AddTransient<IUrlHelper>(x =>
+{
+    var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
+    var factory = x.GetRequiredService<IUrlHelperFactory>();
+    return factory.GetUrlHelper(actionContext);
+});
+
+//EmailService
+builder.Services.AddScoped<EmailService>();
 
 // Register IFileService and its implementation
 builder.Services.AddTransient<IFileService, FileService>();
+#endregion
+
 
 builder.Services.AddControllers();
 

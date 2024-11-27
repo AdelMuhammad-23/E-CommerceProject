@@ -24,7 +24,6 @@ namespace E_CommerceProject.Infrastructure.Repositories
         private readonly UserManager<User> _userManager;
 
         public AuthenticationRepository(JwtSettings jwtSettings, UserManager<User> userManager, IUserRefreshTokenRepository userRefreshTokenRepository, ApplicationDbContext dbContext) : base(dbContext)
-
         {
             _jwtSettings = jwtSettings;
             _userManager = userManager;
@@ -51,6 +50,7 @@ namespace E_CommerceProject.Infrastructure.Repositories
 
             //add this data in UserRefreshTokenTable in database
             await _userRefreshTokens.AddAsync(refreshTokenResult);
+
 
             var response = new JwtAuthResult();
             response.AccessToken = accessToken;
@@ -191,6 +191,5 @@ namespace E_CommerceProject.Infrastructure.Repositories
             return (userId, expirydate);
         }
 
-        #endregion
     }
 }
