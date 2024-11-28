@@ -65,7 +65,6 @@ namespace E_CommerceProject.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
-
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -85,9 +84,72 @@ namespace E_CommerceProject.Controllers
             return Ok("Email confirmed successfully.");
         }
 
+        [HttpPost("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromForm] ChangePasswordDTO changePassword)
+        {
+            //Check if the Id is Exist Or not
+            var user = await _userManager.FindByIdAsync(changePassword.Id.ToString());
+            //return NotFound
+            if (user == null)
+                return NotFound("User in not found.");
+            var newUser = await _userManager.ChangePasswordAsync(user, changePassword.CurrentPassword, changePassword.NewPassword);
 
+            if (changePassword.NewPassword != changePassword.ConfirmPassword)
+                return BadRequest("must newPassword equals confirmPassword.");
 
+            if (!newUser.Succeeded)
+                return BadRequest(newUser.Errors.FirstOrDefault().Description);
 
+            return Ok("Change Password is Successfully.");
+
+        }
+        [HttpPost("SendCodeToResetPassword")]
+        public async Task<Responses<string>> SendCodeToResetPassword([FromForm] SendResetPasswordDTO request)
+        {
+            var sendCode = await _authenticationRepository.SendResetPasswordCodeAsync(request.Email);
+            switch (sendCode)
+            {
+                case ("User Not Found"):
+                    return NotFound<string>("User Not Found");
+                case ("Error When send code to Email"):
+                    return BadRequest<string>("Error When send code to Email");
+                case ("Success"):
+                    return Success<string>("Send reset Password code is successfully");
+                default:
+                    return BadRequest<string>();
+            }
+        }
+        [HttpGet("ConfirmCodeToResetPassword")]
+        public async Task<Responses<string>> ConfirmCodeToResetPassword([FromForm] ConfirmResetPasswordDTO request)
+        {
+            var resetPassword = await _authenticationRepository.ConfirmResetPasswordAsync(request.Email, request.Code);
+            switch (resetPassword)
+            {
+                case ("User is not found "):
+                    return NotFound<string>("User Not Found");
+                case ("Invalid Code"):
+                    return BadRequest<string>("Invalid Code");
+                case ("Success"):
+                    return Success<string>("Confirm reset Password code is successfully");
+                default:
+                    return BadRequest<string>();
+
+            }
+        }
+        [HttpPost("ResetPassword")]
+        public async Task<Responses<string>> ResetPassword([FromForm] ResetPasswordDTo request)
+        {
+            var resetPassword = await _authenticationRepository.ResetPasswordAsync(request.Email, request.Password);
+            switch (resetPassword)
+            {
+                case "User is not found ":
+                    return NotFound<string>("User Not Found");
+                case "Failed":
+                    return BadRequest<string>("Failed to resetPassword");
+                default:
+                    return Success<string>("Reset Password is successfully");
+            }
+        }
 
         [HttpPost("RefreshToken")]
         public async Task<Responses<JwtAuthResult>> RefreshToken([FromBody] RefreshTokenDTO refreshToken)
