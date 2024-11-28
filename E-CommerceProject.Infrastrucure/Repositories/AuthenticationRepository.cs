@@ -1,8 +1,9 @@
-﻿using E_CommerceProject.Core.Entities.Identity;
+using E_CommerceProject.Core.Entities.Identity;
 using E_CommerceProject.Core.Helper;
 using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Infrastructure.Context;
 using E_CommerceProject.Infrastructure.Helper;
+using E_CommerceProject.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -20,16 +21,18 @@ namespace E_CommerceProject.Infrastructure.Repositories
         private readonly IUserRefreshTokenRepository _userRefreshTokenRepository;
         private readonly JwtSettings _jwtSettings;
         private readonly ConcurrentDictionary<string, RefreshToken> _userRefreshToken;
-
+        private readonly EmailService _emailService;
         private readonly UserManager<User> _userManager;
 
-        public AuthenticationRepository(JwtSettings jwtSettings, UserManager<User> userManager, IUserRefreshTokenRepository userRefreshTokenRepository, ApplicationDbContext dbContext) : base(dbContext)
+        public AuthenticationRepository(JwtSettings jwtSettings, EmailService emailService, UserManager<User> userManager, IUserRefreshTokenRepository userRefreshTokenRepository, ApplicationDbContext dbContext) : base(dbContext)
+
         {
             _jwtSettings = jwtSettings;
             _userManager = userManager;
             _userRefreshTokens = dbContext.Set<UserRefreshToken>();
             _userRefreshToken = new ConcurrentDictionary<string, RefreshToken>();
             _userRefreshTokenRepository = userRefreshTokenRepository;
+            _emailService = emailService;
         }
         public async Task<JwtAuthResult> GetJwtToken(User user)
         {
@@ -58,6 +61,69 @@ namespace E_CommerceProject.Infrastructure.Repositories
             return response;
         }
 
+        public async Task<string> SendResetPasswordCodeAsync(string email)
+        {
+            var transact = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                    return "User Not Found";
+                //Generate random number to send in email
+                Random generator = new Random();
+                string randomNumber = generator.Next(0, 10000).ToString("D6");
+                //update user in database
+                user.Code = randomNumber;
+                var updateUser = await _userManager.UpdateAsync(user);
+                if (!updateUser.Succeeded)
+                    return "Error When send code to Email";
+                var massage = $"{randomNumber} is your password reset code";
+
+                await _emailService.SendEmailAsync(user.Email, massage, "ResetPassword");
+                await transact.CommitAsync();
+                return "Success";
+            }
+            catch (Exception ex)
+            {
+                await transact.RollbackAsync();
+                return "Failed";
+            }
+        }
+        public async Task<string> ConfirmResetPasswordAsync(string email, string code)
+        {
+            //user
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return "User is not found ";
+            //code in database 
+            //check code is equal or not
+            if (user.Code != code)
+                return "Invalid Code";
+            return "Success";
+        }
+
+        public async Task<string> ResetPasswordAsync(string email, string Password)
+        {
+            var transact = _dbContext.Database.BeginTransaction();
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                    return "User is not found ";
+
+                var removeOldPassword = await _userManager.RemovePasswordAsync(user);
+                var updatePassword = await _userManager.AddPasswordAsync(user, Password);
+                await transact.CommitAsync();
+                return "Success";
+            }
+            catch (Exception ex)
+            {
+                await transact.RollbackAsync();
+                return "Failed";
+            }
+        }
 
         #region Claims Functions
         public async Task<List<Claim>> GetClaims(User user)
