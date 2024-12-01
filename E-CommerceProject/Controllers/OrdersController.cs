@@ -7,6 +7,7 @@ using E_CommerceProject.Core.Enums;
 using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Core.Responses;
 using Microsoft.AspNetCore.Authorization;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -32,6 +33,7 @@ namespace E_CommerceProject.Controllers
                                 IMapper mapper,
                                 UserManager<User> user
                                )
+
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
@@ -91,5 +93,6 @@ namespace E_CommerceProject.Controllers
             return Ok(response);
         }
         #endregion
+
     }
 }
