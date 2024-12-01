@@ -1,4 +1,4 @@
-﻿namespace E_CommerceProject.Core.DTOs.OrderDTOs
+namespace E_CommerceProject.Core.DTOs.OrderDTOs
 {
     public class AddOrderDTO
     {
@@ -8,5 +8,6 @@
     {
         public int ProductId { get; set; }
         public int Quantity { get; set; }
+
     }
 }

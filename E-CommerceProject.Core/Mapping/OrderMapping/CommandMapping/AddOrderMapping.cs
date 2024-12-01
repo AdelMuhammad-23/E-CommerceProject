@@ -1,4 +1,4 @@
-﻿using E_CommerceProject.Core.DTOs.OrderDTOs;
+using E_CommerceProject.Core.DTOs.OrderDTOs;
 using E_CommerceProject.Core.Entities;
 
 namespace E_CommerceProject.Core.Mapping.OrderMapping
@@ -14,5 +14,6 @@ namespace E_CommerceProject.Core.Mapping.OrderMapping
                 .ForMember(dest => dest.ProductId, src => src.MapFrom(o => o.ProductId))
                 .ForMember(dest => dest.Quantity, src => src.MapFrom(o => o.Quantity));
         }
+
     }
 }
