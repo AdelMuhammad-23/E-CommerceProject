@@ -32,6 +32,7 @@ builder.Services.AddHttpContextAccessor();
 #region Dependency Injection
 //For Business Model
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
+builder.Services.AddTransient<IOrderItemRepository, OrderItemRepository>();
 builder.Services.AddTransient<IOrderRepository, OrderRepository>();
 builder.Services.AddTransient<IReviewRepository, ReviewRepository>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
