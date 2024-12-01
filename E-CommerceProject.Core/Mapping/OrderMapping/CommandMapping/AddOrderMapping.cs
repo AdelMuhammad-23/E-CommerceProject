@@ -7,8 +7,12 @@ namespace E_CommerceProject.Core.Mapping.OrderMapping
     {
         public void AddOrderMapping()
         {
-            CreateMap<AddOrderDTO, Order>();
-        }
+            CreateMap<AddOrderDTO, Order>()
+                .ForMember(dest => dest.OrderItems, src => src.MapFrom(o => o.OrderItems));
 
+            CreateMap<OrderItemDTO, OrderItem>()
+                .ForMember(dest => dest.ProductId, src => src.MapFrom(o => o.ProductId))
+                .ForMember(dest => dest.Quantity, src => src.MapFrom(o => o.Quantity));
+        }
     }
 }

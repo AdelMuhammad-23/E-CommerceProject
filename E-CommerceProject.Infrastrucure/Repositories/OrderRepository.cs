@@ -19,9 +19,17 @@ namespace E_CommerceProject.Infrastructure.Repositories
         #region Handle Functions
         public async Task<string> AddOrderAsync(Order order)
         {
-            await _orders.AddAsync(order);
-            await _dbContext.SaveChangesAsync();
-            return "Success";
+
+            try
+            {
+                await _orders.AddAsync(order);
+                await _dbContext.SaveChangesAsync();
+                return "Success";
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
+            }
         }
         #endregion
     }
