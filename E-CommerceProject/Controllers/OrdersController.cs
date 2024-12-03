@@ -1,48 +1,91 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using E_CommerceProject.Base;
 using E_CommerceProject.Core.DTOs.OrderDTOs;
 using E_CommerceProject.Core.Entities;
-using E_CommerceProject.Core.Entities.Identity;
 using E_CommerceProject.Core.Enums;
 using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Core.Responses;
-using Microsoft.AspNetCore.Authorization;
-
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace E_CommerceProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class OrdersController : AppControllerBase
     {
         #region Fields
         private readonly IOrderRepository _orderRepository;
         private readonly IProductRepository _productRepository;
-        private readonly IOrderItemRepository _orderItemRepository;
         private readonly IMapper _mapper;
-        private readonly UserManager<User> _user;
         #endregion
 
         #region Constructor
         public OrdersController(IOrderRepository orderRepository,
                                 IProductRepository productRepository,
-                                IMapper mapper,
-                                UserManager<User> user
+                                IMapper mapper
                                )
 
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
             _mapper = mapper;
-            _user = user;
         }
         #endregion
 
         #region Endpoints
+
+        [HttpGet("GetAllOrders")]
+        public async Task<IActionResult> GetAllOrders(int pageNumber = 1, int pageSize = 10)
+        {
+            var orders = await _orderRepository.GetAllOrder(pageNumber, pageSize);
+            if (orders == null)
+                return BadRequest("Orders Is not Found");
+            return Ok(orders);
+        }
+        [HttpGet("GetOrderById/{id}")]
+        public async Task<IActionResult> GetOrderById(int id)
+        {
+            var orderDto = await _orderRepository.GetTableNoTracking()
+                                                 .Where(o => o.OrderId == id)
+                                                 .Select(o => new OrderDTO
+                                                 {
+                                                     OrderId = o.OrderId,
+                                                     UserId = o.UserId,
+                                                     OrderDate = o.OrderDate,
+                                                     Status = o.Status,
+                                                     TotalPrice = o.TotalPrice,
+                                                     OrderItems = o.OrderItems.Select(oi => new ListOrderItem
+                                                     {
+                                                         ProductId = oi.ProductId,
+                                                         Quantity = oi.Quantity
+                                                     }).ToList()
+                                                 })
+                                                 .FirstOrDefaultAsync();
+
+            if (orderDto == null)
+                return NotFound("Order is not found");
+
+            return Ok(orderDto);
+        }
+        [HttpGet("User/{userId}")]
+        public async Task<IActionResult> GetOrderByUser(int userId)
+        {
+            var orders = await _orderRepository.GetTableNoTracking()
+                                               .Where(o => o.UserId == userId)
+                                               .OrderByDescending(o => o.OrderDate)
+                                               .ProjectTo<OrderDTO>(_mapper.ConfigurationProvider)
+                                               .ToListAsync();
+
+            if (!orders.Any())
+                return NotFound("No orders found for this user.");
+
+            return Ok(orders);
+        }
+
+
         [HttpPost("AddOrder")]
         public async Task<IActionResult> AddProduct([FromBody] AddOrderDTO orderDTO)
         {
@@ -92,6 +135,25 @@ namespace E_CommerceProject.Controllers
 
             return Ok(response);
         }
+
+        [HttpDelete("DeleteOrderById/{Id}")]
+        public async Task<IActionResult> DeleteOrderById(int Id)
+        {
+            var order = await _orderRepository.GetOrderById(Id);
+            if (order == null)
+                return NotFound("Order is not found");
+
+            try
+            {
+                await _orderRepository.DeleteAsync(order);
+                return Ok(new { Message = "Order is deleted successfully", OrderId = Id });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred: " + ex.Message);
+            }
+        }
+
         #endregion
 
     }

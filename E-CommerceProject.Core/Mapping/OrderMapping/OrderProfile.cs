@@ -7,6 +7,8 @@ namespace E_CommerceProject.Core.Mapping.OrderMapping
         public OrderProfile()
         {
             AddOrderMapping();
+            GetAllOrderMapping();
+            GetOrderByIdMapping();
         }
     }
 }

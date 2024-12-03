@@ -53,7 +53,7 @@ namespace E_CommerceProject.Infrastructure.Repositories
 
             //add this data in UserRefreshTokenTable in database
             await _userRefreshTokens.AddAsync(refreshTokenResult);
-
+            await _dbContext.SaveChangesAsync();
 
             var response = new JwtAuthResult();
             response.AccessToken = accessToken;
