@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using SchoolProject.Infrastructure;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,9 +31,16 @@ option.UseSqlServer(ConnectionString)
 builder.Services.AddHttpContextAccessor();
 
 #region Dependency Injection
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(c =>
+{
+    var options = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("Redis"));
+    return ConnectionMultiplexer.Connect(options);
+});
 //For Business Model
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<IOrderItemRepository, OrderItemRepository>();
+builder.Services.AddTransient<IBasketRepository, BasketRepository>();
 builder.Services.AddTransient<IOrderRepository, OrderRepository>();
 builder.Services.AddTransient<IReviewRepository, ReviewRepository>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();

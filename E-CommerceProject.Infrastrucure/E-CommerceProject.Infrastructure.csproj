@@ -30,6 +30,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.22" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.0.0" />

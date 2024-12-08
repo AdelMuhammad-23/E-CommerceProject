@@ -135,9 +135,64 @@ namespace E_CommerceProject.Controllers
 
             return Ok(response);
         }
+        [HttpPut("UpdateOrder")]
+        public async Task<IActionResult> UpdateOrder(AddOrderDTO updateOrder)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+                return Unauthorized("User is not authorized");
+            var UserId = int.Parse(userIdClaim.Value);
+            var orders = await _orderRepository.GetTableNoTracking()
+                                              .Where(o => o.UserId == UserId)
+                                              .OrderByDescending(o => o.OrderDate)
+                                              .ToListAsync();
+
+            await _orderRepository.DeleteRangeAsync(orders);
+
+            if (!orders.Any())
+                return NotFound("No orders found for this user.");
+
+            var order = new Order
+            {
+                UserId = int.Parse(userIdClaim.Value),
+                TotalPrice = 0,
+                OrderItems = new List<OrderItem>()
+            };
+
+            foreach (var itemDTO in updateOrder.OrderItems)
+            {
+                var product = await _productRepository.GetByIdAsync(itemDTO.ProductId);
+                if (product == null)
+                    return BadRequest($"Product with ID {itemDTO.ProductId} not found");
+
+                var itemTotalPrice = itemDTO.Quantity * product.Price;
+                order.TotalPrice += itemTotalPrice;
+
+                order.OrderItems.Add(new OrderItem
+                {
+                    ProductId = itemDTO.ProductId,
+                    Quantity = itemDTO.Quantity,
+                    Price = itemTotalPrice
+                });
+            }
+            var result = await _orderRepository.AddOrderAsync(order);
+            if (result != "Success")
+                return BadRequest("Failed to add new order");
+
+            var response = new OrderResponse
+            {
+                UserId = int.Parse(userIdClaim.Value),
+                Status = OrderStatus.Pending.ToString(),
+                OrderDate = DateTime.UtcNow,
+                OrderItems = updateOrder.OrderItems,
+                TotalPrice = order.TotalPrice
+            };
+            return Ok(response);
+        }
 
         [HttpDelete("DeleteOrderById/{Id}")]
-        public async Task<IActionResult> DeleteOrderById(int Id)
+        public async Task<IActionResult> DeleteOrderById([FromRoute] int Id)
+=
         {
             var order = await _orderRepository.GetOrderById(Id);
             if (order == null)
