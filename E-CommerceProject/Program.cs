@@ -1,8 +1,8 @@
+using E_CommerceProject.Core.Helper;
 using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Core.Mapping.ProductMapping;
 using E_CommerceProject.Environment;
 using E_CommerceProject.Infrastructure.Context;
-using E_CommerceProject.Infrastructure.files;
 using E_CommerceProject.Infrastructure.Repositories;
 using E_CommerceProject.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using SchoolProject.Infrastructure;
 using StackExchange.Redis;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,8 +79,14 @@ builder.Services.AddTransient<IUrlHelper>(x =>
 builder.Services.AddScoped<EmailService>();
 
 // Register IFileService and its implementation
-builder.Services.AddTransient<IFileService, FileService>();
+builder.Services.AddTransient<E_CommerceProject.Infrastructure.files.IFileService, E_CommerceProject.Infrastructure.files.FileService>();
 #endregion
+
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<PaymentService>();
+// Configure Stripe settings
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
+StripeConfiguration.ApiKey = builder.Configuration["StripeSettings:SecretKey"];
 
 
 builder.Services.AddControllers();
