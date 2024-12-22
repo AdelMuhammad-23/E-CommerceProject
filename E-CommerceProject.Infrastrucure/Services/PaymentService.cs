@@ -17,7 +17,6 @@ namespace E_CommerceProject.Infrastructure.Services
 
         public async Task<PaymentResponseDTO> CreatePaymentIntent(CreatePaymentDTO dto, string userId)
         {
-            // إعدادات الدفع
             var options = new PaymentIntentCreateOptions
             {
                 Amount = (long)(dto.Amount * 100),
