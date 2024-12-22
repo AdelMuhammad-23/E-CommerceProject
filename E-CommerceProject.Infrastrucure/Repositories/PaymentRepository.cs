@@ -30,11 +30,11 @@ namespace E_CommerceProject.Infrastructure.Repositories
         public async Task UpdatePaymentStatusAsync(string paymentIntentId, PaymentStatus status)
         {
             var payment = await GetPaymentByIntentIdAsync(paymentIntentId);
-            if (payment != null)
-            {
-                payment.Status = status;
-                await _context.SaveChangesAsync();
-            }
+            if (payment == null)
+                throw new InvalidOperationException($"Payment with Intent ID {paymentIntentId} not found.");
+
+            payment.Status = status;
+            await _context.SaveChangesAsync();
         }
     }
 }
