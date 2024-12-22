@@ -15,11 +15,12 @@ namespace E_CommerceProject.Infrastructure.Services
             _paymentRepository = paymentRepository;
         }
 
-        public async Task<PaymentResponseDTO> CreatePaymentIntent(CreatePaymentDTO dto)
+        public async Task<PaymentResponseDTO> CreatePaymentIntent(CreatePaymentDTO dto, string userId)
         {
             var options = new PaymentIntentCreateOptions
             {
-                Amount = (long)(dto.Amount * 100), // Stripe works in cents
+                Amount = (long)(dto.Amount * 100),
+
                 Currency = dto.Currency,
                 Metadata = new Dictionary<string, string> { { "OrderId", dto.OrderId.ToString() } }
             };
@@ -33,8 +34,11 @@ namespace E_CommerceProject.Infrastructure.Services
                 Amount = dto.Amount,
                 Currency = dto.Currency,
                 PaymentIntentId = intent.Id,
+                TransactionId = Guid.NewGuid().ToString(),
                 PaymentDate = DateTime.UtcNow,
-                Status = PaymentStatus.Pending
+                Status = PaymentStatus.Pending,
+                UserId = int.Parse(userId)
+
             };
 
             await _paymentRepository.AddPaymentAsync(payment);
@@ -47,6 +51,7 @@ namespace E_CommerceProject.Infrastructure.Services
             };
         }
 
+
         public async Task HandlePaymentSucceeded(string paymentIntentId)
         {
             await _paymentRepository.UpdatePaymentStatusAsync(paymentIntentId, PaymentStatus.Completed);
@@ -58,3 +63,4 @@ namespace E_CommerceProject.Infrastructure.Services
         }
     }
 }
+
