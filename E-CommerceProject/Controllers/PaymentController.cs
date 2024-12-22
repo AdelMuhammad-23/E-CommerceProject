@@ -14,6 +14,7 @@ namespace E_CommerceProject.API.Controllers
         private readonly PaymentService _paymentService;
 
         public PaymentsController(PaymentService paymentService)
+
         {
             _paymentService = paymentService;
         }
@@ -47,5 +48,6 @@ namespace E_CommerceProject.API.Controllers
             await _paymentService.HandlePaymentFailed(paymentIntentId);
             return Ok("Payment failed and status updated.");
         }
+
     }
 }

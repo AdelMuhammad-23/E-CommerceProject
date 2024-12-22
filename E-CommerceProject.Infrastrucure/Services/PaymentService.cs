@@ -21,6 +21,7 @@ namespace E_CommerceProject.Infrastructure.Services
             var options = new PaymentIntentCreateOptions
             {
                 Amount = (long)(dto.Amount * 100),
+
                 Currency = dto.Currency,
                 Metadata = new Dictionary<string, string> { { "OrderId", dto.OrderId.ToString() } }
             };
@@ -38,6 +39,7 @@ namespace E_CommerceProject.Infrastructure.Services
                 PaymentDate = DateTime.UtcNow,
                 Status = PaymentStatus.Pending,
                 UserId = int.Parse(userId)
+
             };
 
             await _paymentRepository.AddPaymentAsync(payment);
@@ -62,3 +64,4 @@ namespace E_CommerceProject.Infrastructure.Services
         }
     }
 }
+
