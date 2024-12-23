@@ -45,7 +45,7 @@ namespace E_CommerceProject.Infrastructure.Repositories
                 {
                     CategoryId = c.CategoryId,
                     CategoryName = c.CategoryName,
-                    ProductCategories = c.ProductCategories.Count() // عدد المنتجات في الفئة
+                    ProductCategories = c.ProductCategories.Count()
                 })
                 .ToListAsync();
 
