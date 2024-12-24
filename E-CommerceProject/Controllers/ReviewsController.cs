@@ -50,5 +50,37 @@ namespace E_CommerceProject.Controllers
                 return Ok("Add Review is Successfully.");
             return BadRequest("Error when add Review");
         }
+
+
+        [HttpPut("Update-Review")]
+        public async Task<IActionResult> UpdateReview([FromQuery] UpdateReviewDTO updateReview)
+        {
+
+            var product = await _productRepository.GetByIdAsync(updateReview.ProductId);
+            if (product == null)
+                return NotFound("Product is Not Found");
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+                return Unauthorized("User is not authorized");
+
+            var review = await _reviewRepository.GetByIdAsync(updateReview.ReviewId);
+
+            var ReviewMapping = _mapper.Map(updateReview, review);
+            //comment or rating == null => don't change in database
+            if (updateReview.Rating != null || updateReview.Comment != null)
+            {
+                var UpdateReview = await _reviewRepository.UpdateReviewAsync(ReviewMapping);
+
+                if (UpdateReview == "Success")
+                    return Ok("Update Review is Successfully.");
+                if (UpdateReview == null)
+                    return NotFound("Review is Not Found");
+
+            }
+
+
+            return BadRequest("Error when update Review");
+        }
     }
 }
