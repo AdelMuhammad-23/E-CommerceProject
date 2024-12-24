@@ -3,6 +3,7 @@ using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace E_CommerceProject.Infrastructure.Repositories
 {
     public class ReviewRepository : GenericRepository<Review>, IReviewRepository
@@ -22,6 +23,7 @@ namespace E_CommerceProject.Infrastructure.Repositories
         public async Task<string> UpdateReviewAsync(Review updateReview)
         {
             _reviews.Update(updateReview);
+
             await _dbContext.SaveChangesAsync();
             return "Success";
         }

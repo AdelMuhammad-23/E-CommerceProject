@@ -7,5 +7,6 @@ namespace E_CommerceProject.Core.Interfaces
         public Task<string> CreateReviewAsync(Review addReview);
         public Task<string> UpdateReviewAsync(Review updateReview);
         //public Task<string> DeleteReviewAsync(Review addReview);
+
     }
 }
