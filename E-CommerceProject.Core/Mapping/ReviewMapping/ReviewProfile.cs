@@ -7,6 +7,8 @@ namespace E_CommerceProject.Core.Mapping.ReviewMapping
         public ReviewProfile()
         {
             CreateReviewMapping();
+            UpdateReviewMapping();
+
         }
     }
 }
