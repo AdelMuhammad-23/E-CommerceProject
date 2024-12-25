@@ -29,6 +29,12 @@ namespace E_CommerceProject.Controllers
             _reviewRepository = reviewRepository;
             _productRepository = productRepository;
         }
+        [HttpPost("Get-All-Reviews")]
+        public async Task<IActionResult> GetAllReviews(int pageNumber = 1, int pageSize = 10)
+        {
+            var reviews = await _reviewRepository.GetPaginationReviews(pageNumber, pageSize);
+            return Ok(reviews);
+        }
         [HttpPost("Add-Review")]
         public async Task<IActionResult> CreateReview([FromQuery] CreateReviewDTO createReview)
         {
@@ -55,7 +61,6 @@ namespace E_CommerceProject.Controllers
         [HttpPut("Update-Review")]
         public async Task<IActionResult> UpdateReview([FromQuery] UpdateReviewDTO updateReview)
         {
-
             var product = await _productRepository.GetByIdAsync(updateReview.ProductId);
             if (product == null)
                 return NotFound("Product is Not Found");
@@ -64,24 +69,39 @@ namespace E_CommerceProject.Controllers
             if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
                 return Unauthorized("User is not authorized");
 
-            var review = await _reviewRepository.GetByIdAsync(updateReview.ReviewId);
+            var existingReview = await _reviewRepository.GetByIdAsync(updateReview.ReviewId);
+            if (existingReview == null)
+                return NotFound("Review is Not Found");
 
-            var ReviewMapping = _mapper.Map(updateReview, review);
-            //comment or rating == null => don't change in database
-            if (updateReview.Rating != null || updateReview.Comment != null)
+            var reviewMapping = _mapper.Map(updateReview, existingReview);
+            if (updateReview != null)
             {
-                var UpdateReview = await _reviewRepository.UpdateReviewAsync(ReviewMapping);
+                if (updateReview.Rating != null)
+                    reviewMapping.Rating = (int)updateReview.Rating.Value;
 
-                if (UpdateReview == "Success")
+                if (!string.IsNullOrEmpty(updateReview.Comment))
+                    reviewMapping.Comment = updateReview.Comment;
+
+                var updateResult = await _reviewRepository.UpdateReviewAsync(reviewMapping);
+                if (updateResult == "Success")
                     return Ok("Update Review is Successfully.");
-                if (UpdateReview == null)
-                    return NotFound("Review is Not Found");
-
             }
-
-
-            return BadRequest("Error when update Review");
+            return BadRequest("No updates were made.");
         }
 
+        [HttpDelete("Delete-Review/{id}")]
+        public async Task<IActionResult> DeleteReview([FromRoute] int id)
+        {
+            var existingReview = await _reviewRepository.GetByIdAsync(id);
+            if (existingReview == null)
+                return NotFound("Review is Not Found");
+
+            var updateResult = await _reviewRepository.DeleteReviewAsync(existingReview);
+            if (updateResult == "Success")
+                return Ok("Delete Review is Successfully.");
+
+            return BadRequest("Error when delete review.");
+        }
     }
 }
+
