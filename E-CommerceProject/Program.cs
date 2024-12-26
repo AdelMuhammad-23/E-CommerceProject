@@ -51,6 +51,9 @@ builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IAuthenticationRepository, AuthenticationRepository>();
 builder.Services.AddTransient<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
 
+//For Authorization
+builder.Services.AddTransient<IAuthorizationRepository, AuthorizationRepository>();
+
 //For Account
 builder.Services.AddTransient<IAddressRepository, AddressRepository>();
 
