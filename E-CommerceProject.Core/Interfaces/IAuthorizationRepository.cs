@@ -13,5 +13,6 @@ namespace E_CommerceProject.Core.Interfaces
         public Task<string> EditUserClaimsAsync(EditUserClaims editUserClaims);
         public Task<ManageUserClaimsResponse> ManageUserClaims(User user);
 
+
     }
 }
