@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using E_CommerceProject.Base;
 using E_CommerceProject.Core.DTOs.AuthenticationDTOs;
 using E_CommerceProject.Core.Entities.Identity;
