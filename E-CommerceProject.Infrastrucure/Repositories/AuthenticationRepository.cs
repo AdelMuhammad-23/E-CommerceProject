@@ -55,11 +55,61 @@ namespace E_CommerceProject.Infrastructure.Repositories
             await _userRefreshTokens.AddAsync(refreshTokenResult);
             await _dbContext.SaveChangesAsync();
 
+
             var response = new JwtAuthResult();
             response.AccessToken = accessToken;
             response.RefreshToken = refreshToken;
             return response;
         }
+
+        public async Task<string> SendResetPasswordCodeAsync(string email)
+        {
+            var transact = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                    return "User Not Found";
+                //Generate random number to send in email
+                Random generator = new Random();
+                string randomNumber = generator.Next(0, 10000).ToString("D6");
+                //update user in database
+                user.Code = randomNumber;
+                var updateUser = await _userManager.UpdateAsync(user);
+                if (!updateUser.Succeeded)
+                    return "Error When send code to Email";
+                var massage = $"{randomNumber} is your password reset code";
+
+                await _emailService.SendEmailAsync(user.Email, massage, "ResetPassword");
+                await transact.CommitAsync();
+                return "Success";
+            }
+            catch (Exception ex)
+            {
+                await transact.RollbackAsync();
+                return "Failed";
+            }
+        }
+        public async Task<string> ConfirmResetPasswordAsync(string email, string code)
+        {
+            //user
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return "User is not found ";
+            //code in database 
+            //check code is equal or not
+            if (user.Code != code)
+                return "Invalid Code";
+            return "Success";
+        }
+
+        public async Task<string> ResetPasswordAsync(string email, string Password)
+        {
+            var transact = _dbContext.Database.BeginTransaction();
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
 
         public async Task<string> SendResetPasswordCodeAsync(string email)
         {

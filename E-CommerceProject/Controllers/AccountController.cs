@@ -94,7 +94,7 @@ public class AccountController : AppControllerBase
             return StatusCode(500, "Internal server error. Please try again later.");
         }
     }
-    [HttpPost("Add-Address")]
+    [HttpPost("AddAddress")]
     public async Task<IActionResult> AddAddress(AddAddressDTO addressDto)
     {
         var address = _mapper.Map<Address>(addressDto);
