@@ -109,7 +109,7 @@ public class AccountController : AppControllerBase
          ? Ok(new { Message = "Address added successfully." })
          : BadRequest("Failed to add address.");
     }
-    [HttpPut("UpdateAddress")]
+    [HttpPut("Update-Address")]
     public async Task<IActionResult> UpdateAddress([FromForm] UpdateAddressDtO updateAddress)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -161,7 +161,7 @@ public class AccountController : AppControllerBase
         //return Token 
         return Success(result);
     }
-    [HttpPut("UpdateProfile")]
+    [HttpPut("Update-Profile")]
     public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileDTO updateUser)
     {
         var user = await _userManager.FindByIdAsync(updateUser.Id.ToString());

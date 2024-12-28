@@ -1,8 +1,8 @@
+using E_CommerceProject.Core.Helper;
 using E_CommerceProject.Core.Interfaces;
 using E_CommerceProject.Core.Mapping.ProductMapping;
 using E_CommerceProject.Environment;
 using E_CommerceProject.Infrastructure.Context;
-using E_CommerceProject.Infrastructure.files;
 using E_CommerceProject.Infrastructure.Repositories;
 using E_CommerceProject.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using SchoolProject.Infrastructure;
+using StackExchange.Redis;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,8 +32,17 @@ option.UseSqlServer(ConnectionString)
 builder.Services.AddHttpContextAccessor();
 
 #region Dependency Injection
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(c =>
+{
+    var options = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("Redis"));
+    return ConnectionMultiplexer.Connect(options);
+});
 //For Business Model
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
+builder.Services.AddTransient<IOrderItemRepository, OrderItemRepository>();
+builder.Services.AddTransient<IBasketRepository, BasketRepository>();
+builder.Services.AddTransient<IOrderRepository, OrderRepository>();
 builder.Services.AddTransient<IReviewRepository, ReviewRepository>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
@@ -39,6 +50,9 @@ builder.Services.AddTransient<IUserRepository, UserRepository>();
 //For Authentication
 builder.Services.AddTransient<IAuthenticationRepository, AuthenticationRepository>();
 builder.Services.AddTransient<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
+
+//For Authorization
+builder.Services.AddTransient<IAuthorizationRepository, AuthorizationRepository>();
 
 //For Account
 builder.Services.AddTransient<IAddressRepository, AddressRepository>();
@@ -68,8 +82,14 @@ builder.Services.AddTransient<IUrlHelper>(x =>
 builder.Services.AddScoped<EmailService>();
 
 // Register IFileService and its implementation
-builder.Services.AddTransient<IFileService, FileService>();
+builder.Services.AddTransient<E_CommerceProject.Infrastructure.files.IFileService, E_CommerceProject.Infrastructure.files.FileService>();
 #endregion
+
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<PaymentService>();
+// Configure Stripe settings
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
+StripeConfiguration.ApiKey = builder.Configuration["StripeSettings:SecretKey"];
 
 
 builder.Services.AddControllers();
